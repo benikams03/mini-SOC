@@ -2,6 +2,11 @@ import Card from '../../components/ui/card'
 import Badge from '../../components/ui/badge'
 import Button from '../../components/ui/button'
 
+import { 
+    RefreshCw,
+    Siren, ClipboardList, Settings, Users 
+} from 'lucide-react'
+
 export default function Index_admin() {
     const stats = [
         { title: 'Alertes Actives', value: '24', change: '+3', icon: '🚨', color: 'danger' },
@@ -33,26 +38,60 @@ export default function Index_admin() {
                     <h2 className="text-2xl font-bold text-gray-900">Dashboard</h2>
                     <p className="text-gray-500 mt-1">Vue d'ensemble du SOC</p>
                 </div>
-                <Button variant="primary">Rafraîchir</Button>
+                <Button variant="primary" 
+                    icone={<RefreshCw className="w-4 h-4" />}
+                    >Rafraîchir</Button>
             </div>
 
             {/* Stats Grid */}
-            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
-                {stats.map((stat, index) => (
-                    <Card key={index} className="hover:shadow-md transition-shadow">
-                        <div className="flex items-center justify-between">
-                            <div>
-                                <p className="text-sm font-medium text-gray-500">{stat.title}</p>
-                                <p className="text-3xl font-bold text-gray-900 mt-2">{stat.value}</p>
-                                <p className={`text-sm mt-1 ${stat.change.startsWith('+') ? 'text-green-600' : 'text-gray-500'}`}>
-                                    {stat.change} depuis hier
-                                </p>
-                            </div>
-                            <div className="text-4xl">{stat.icon}</div>
+            <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
+                <Card>
+                    <div className="flex items-center py-4 justify-between">
+                        <div>
+                            <p className="text-lg font-medium text-gray-600">Alertes Actives</p>
+                            <p className="text-4xl font-bold text-gray-900 mt-1">24</p>
                         </div>
-                    </Card>
-                ))}
+                        <div className="text-4xl">
+                            <Siren size={42} className='text-gray-500' />
+                        </div>
+                    </div>
+                </Card>
+                <Card>
+                    <div className="flex items-center py-4 justify-between">
+                        <div>
+                            <p className="text-lg font-medium text-gray-600">Logs Aujourd'hui</p>
+                            <p className="text-4xl font-bold text-gray-900 mt-1">1,234</p>
+                        </div>
+                        <div className="text-4xl">
+                            <ClipboardList size={42} className='text-gray-500' />
+                        </div>
+                    </div>
+                </Card>
+                <Card>
+                    <div className="flex items-center py-4 justify-between">
+                        <div>
+                            <p className="text-lg font-medium text-gray-600">Règles IDS</p>
+                            <p className="text-4xl font-bold text-gray-900 mt-1">42</p>
+                        </div>
+                        <div className="text-4xl">
+                            <Settings size={42} className='text-gray-500' />
+                        </div>
+                    </div>
+                </Card>
+                <Card>
+                    <div className="flex items-center py-4 justify-between">
+                        <div>
+                            <p className="text-lg font-medium text-gray-600">Utilisateurs Actifs</p>
+                            <p className="text-4xl font-bold text-gray-900 mt-1">8</p>
+                        </div>
+                        <div className="text-4xl">
+                            <Users size={42} className='text-gray-500' />
+                        </div>
+                    </div>
+                </Card>
             </div>
+
+
 
             {/* Main Content Grid */}
             <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
@@ -66,7 +105,7 @@ export default function Index_admin() {
                         {recentAlerts.map((alert) => (
                             <div 
                                 key={alert.id}
-                                className="flex items-center justify-between p-4 bg-gray-50 rounded-lg hover:bg-gray-100 transition-colors"
+                                className="flex items-center justify-between p-4 bg-gray-50 border border-gray-200 rounded-lg hover:bg-gray-100 transition-colors"
                             >
                                 <div className="flex items-center gap-4">
                                     <Badge variant={severityColors[alert.severity]}>

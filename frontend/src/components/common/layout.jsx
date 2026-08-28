@@ -117,7 +117,7 @@ export default function Layout_admin() {
 
                 </div>
 
-                <div className="p-6">
+                <div className="p-4">
                     <Outlet />
                 </div>
             </main>

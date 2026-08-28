@@ -10,13 +10,13 @@ const Card = ({
 }) => {
   return (
     <div 
-      className={`bg-white rounded-xl shadow-sm border border-gray-200 overflow-hidden ${className}`}
+      className={`bg-white rounded-lg border border-gray-300/70 overflow-hidden ${className}`}
       {...props}
     >
       {(title || subtitle) && (
         <div className="px-6 py-4 border-b border-gray-100">
           {title && <h3 className="text-lg font-semibold text-gray-900">{title}</h3>}
-          {subtitle && <p className="text-sm text-gray-500 mt-1">{subtitle}</p>}
+          {subtitle && <p className="text-sm text-gray-500">{subtitle}</p>}
         </div>
       )}
       <div className="px-6 py-4">
