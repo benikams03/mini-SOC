@@ -11,3 +11,9 @@ frontend/node_modules
 frontend/dist
 frontend/dist-ssr
 frontend/*.local
+frontend/.env
+
+
+# Folder backend
+backend/node_modules
+backend/.env
