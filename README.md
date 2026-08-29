@@ -185,13 +185,13 @@ Le projet est déployé sur une plateforme cloud afin d'être accessible publiqu
 
 ### Frontend
 
-Plateforme : **Vercel **
+Plateforme : **Vercel**
 
 URL : `https://mini-soc-unikin.vercel.app/`
 
 ### Backend
 
-Plateforme : **Render **
+Plateforme : **Render**
 
 URL : `https://mini-soc-api.onrender.com`
 
