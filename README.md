@@ -187,7 +187,7 @@ Le projet est déployé sur une plateforme cloud afin d'être accessible publiqu
 
 Plateforme : **Vercel **
 
-URL : `[https://mini-soc-unikin.vercel.app](https://mini-soc-unikin.vercel.app/)`
+URL : `https://mini-soc-unikin.vercel.app/`
 
 ### Backend
 
