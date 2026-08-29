@@ -1,7 +1,7 @@
 import { Outlet, Link, useLocation } from "react-router-dom"
 import { useState } from "react"
 import { ShieldCheck, PanelRight, PanelLeft, 
-    ChartColumnIncreasing, ShieldAlert, Clipboard, Settings, Users, Wrench, ChartNoAxesCombined,
+    ChartColumnIncreasing, ShieldAlert, Clipboard, Users, Wrench,
     LogOut } 
     from "lucide-react"
 
@@ -15,8 +15,6 @@ export default function Layout_admin() {
         { name: 'Logs', path: '/admin/logs', icon: Clipboard },
         { name: 'Règles IDS', path: '/admin/rules', icon: Wrench },
         { name: 'Utilisateurs', path: '/admin/users', icon: Users },
-        { name: 'Rapports', path: '/admin/reports', icon: ChartNoAxesCombined },
-        { name: 'Paramètres', path: '/admin/settings', icon: Settings },
     ]
 
     const isActive = (path) => location.pathname === path
@@ -67,7 +65,7 @@ export default function Layout_admin() {
                     </div>
 
                     <div className="m-2" >
-                        <div className="bg-white rounded-md p-2 flex items-center gap-2">
+                        <button className="bg-white rounded-md p-2 flex items-center gap-2 cursor-pointer w-full">
                             <div className="bg-gray-300 p-2 rounded-md">
                                <LogOut size={12} />
                             </div>
@@ -75,7 +73,7 @@ export default function Layout_admin() {
                             <div className="text-gray-400">
                                 <h2 className="font-semibold text-gray-600 text-md">Deconnexion</h2>
                             </div> }
-                        </div>
+                        </button>
                     </div>
 
                 </div>
