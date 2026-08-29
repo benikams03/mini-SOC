@@ -52,7 +52,7 @@ export default function Login() {
 
                     <Button
                         type="submit"
-                        variant="primary"1
+                        variant="primary"
                         disabled={isLoading}
                         className="w-full"
                     >
