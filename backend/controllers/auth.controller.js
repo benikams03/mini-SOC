@@ -6,6 +6,7 @@ class AuthController {
 
     constructor(){
         this.users = database.collection('users')
+        this.logs = database.collection('logs')
     }
     
     async register(app ,req, reply) {  
@@ -21,6 +22,13 @@ class AuthController {
             })
 
             if ( verify_email ) {
+                await this.logs.insertOne({
+                    type: 'error',
+                    action: 'Creation de compte administrateur',
+                    adress_ip: req.ip,
+                    message: 'Adresse email déjà utilisée',
+                    created_at: new Date()
+                })
                 return reply.send({
                     success: false,
                     message: "Votre adresse email est déjà utilisée",
@@ -48,6 +56,14 @@ class AuthController {
 
             // Send welcome email
             // await send_mail.Welcome(email);
+            
+            await this.logs.insertOne({
+                type: 'success',
+                action: 'Creation de compte administrateur',
+                adress_ip: req.ip,
+                message: 'Compte créé avec succès',
+                created_at: new Date()
+            })
 
             reply.send({
                 success: true,
@@ -75,6 +91,14 @@ class AuthController {
             });
 
             if (!user) {
+                await this.logs.insertOne({
+                    type: 'error',
+                    action: 'Connexion administrateur',
+                    adress_ip: req.ip,
+                    message: 'Adresse email ou mot de passe incorrect',
+                    created_at: new Date()
+                })
+
                 return reply.send({
                     success: false,
                     message: "Adresse email ou mot de passe incorrect",
@@ -84,6 +108,14 @@ class AuthController {
             const isPasswordValid = await bcrypt.compare(password, user.password);
 
             if (!isPasswordValid) {
+                await this.logs.insertOne({
+                    type: 'error',
+                    action: 'Connexion administrateur',
+                    adress_ip: req.ip,
+                    message: 'Adresse email ou mot de passe incorrect',
+                    created_at: new Date()
+                })
+                
                 return reply.send({
                     success: false,
                     message: "Adresse email ou mot de passe incorrect",
@@ -102,6 +134,14 @@ class AuthController {
                 { expiresIn: '7d' }
             )
 
+            await this.logs.insertOne({
+                type: 'success',
+                action: 'Connexion administrateur',
+                adress_ip: req.ip,
+                message: 'Connexion réussie',
+                created_at: new Date()
+            })
+            
             reply.send({
                 success: true,
                 data: {
