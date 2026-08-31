@@ -9,91 +9,135 @@ export default function Rules() {
     const rules = [
         { 
             id: 'IDS-001', 
-            name: 'Brute Force Detection', 
-            category: 'Authentication',
+            name: 'Brute Force Login', 
+            category: 'Authentification',
             severity: 'critical',
             status: 'active',
             created: '2024-08-15',
-            description: 'Detects multiple failed login attempts from the same IP address within a short time period.',
-            pattern: 'failed_login_count > 5 AND time_window < 60s',
-            action: 'block_ip_temporarily'
+            description: 'Détecte plusieurs tentatives de connexion échouées depuis la même adresse IP sur une courte période.',
+            action: 'Bloquer temporairement l\'IP et générer une alerte',
+            plugin: '@fastify/rate-limit'
         },
         { 
             id: 'IDS-002', 
-            name: 'SQL Injection Pattern', 
-            category: 'Injection',
+            name: 'Trop de requêtes', 
+            category: 'DoS / Abus API',
             severity: 'critical',
             status: 'active',
             created: '2024-08-16',
-            description: 'Identifies SQL injection attempts in HTTP requests and query parameters.',
-            pattern: 'SELECT.*FROM|UNION.*SELECT|DROP.*TABLE',
-            action: 'block_request'
+            description: 'Identifie des taux de requêtes excessifs provenant d\'une seule source.',
+            action: 'Limiter les requêtes et bloquer temporairement la source',
+            plugin: '@fastify/rate-limit'
         },
         { 
             id: 'IDS-003', 
-            name: 'DDoS Detection', 
-            category: 'Network',
+            name: 'Accès non autorisé', 
+            category: 'Authorization',
             severity: 'high',
             status: 'active',
             created: '2024-08-17',
-            description: 'Monitors traffic patterns to detect potential DDoS attack preparation.',
-            pattern: 'request_rate > 1000/min',
-            action: 'rate_limit'
+            description: 'Détecte les tentatives d\'accès aux ressources sans autorisation appropriée.',
+            action: 'Refuser l\'accès et journaliser l\'événement',
+            plugin: '@fastify/jwt'
         },
         { 
             id: 'IDS-004', 
-            name: 'Port Scanning', 
-            category: 'Reconnaissance',
-            severity: 'medium',
+            name: 'Tentative SQL Injection', 
+            category: 'Injection',
+            severity: 'critical',
             status: 'active',
             created: '2024-08-18',
-            description: 'Detects port scanning activities across multiple ports.',
-            pattern: 'unique_ports_accessed > 20',
-            action: 'log_only'
+            description: 'Identifie les tentatives d\'injection SQL dans les requêtes HTTP et les paramètres de requête.',
+            action: 'Bloquer la requête et générer une alerte critique',
+            plugin: 'validator + règles personnalisées'
         },
         { 
             id: 'IDS-005', 
-            name: 'Malware Signature', 
-            category: 'Malware',
+            name: 'Tentative XSS', 
+            category: 'Web Attack',
             severity: 'high',
             status: 'active',
             created: '2024-08-19',
-            description: 'Matches known malware signatures in network traffic.',
-            pattern: 'known_malware_hash',
-            action: 'isolate_device'
+            description: 'Détecte les tentatives de Cross-Site Scripting dans les entrées utilisateur.',
+            action: 'Nettoyer/rejeter l\'entrée et journaliser',
+            plugin: 'validator / sanitize-html'
         },
         { 
             id: 'IDS-006', 
-            name: 'XSS Attack', 
-            category: 'Injection',
+            name: 'IP suspecte', 
+            category: 'Réseau',
             severity: 'high',
-            status: 'inactive',
+            status: 'active',
             created: '2024-08-20',
-            description: 'Detects Cross-Site Scripting attempts in user inputs.',
-            pattern: '<script>|javascript:|onerror=',
-            action: 'sanitize_input'
+            description: 'Détecte les adresses IP provenant de sources malveillantes connues ou présentant un comportement suspect.',
+            action: 'Bloquer l\'IP et créer une alerte',
+            plugin: 'Règle personnalisée'
         },
         { 
             id: 'IDS-007', 
-            name: 'Data Exfiltration', 
-            category: 'Data Loss',
-            severity: 'critical',
+            name: 'User-Agent suspect', 
+            category: 'Reconnaissance',
+            severity: 'medium',
             status: 'active',
             created: '2024-08-21',
-            description: 'Monitors for large data transfers to unknown destinations.',
-            pattern: 'data_transfer > 1GB AND unknown_destination',
-            action: 'block_transfer'
+            description: 'Identifie les chaînes user-agent suspectes ou automatisées indiquant des outils de reconnaissance.',
+            action: 'Journaliser et générer une alerte',
+            plugin: 'Règle personnalisée'
         },
         { 
             id: 'IDS-008', 
-            name: 'Unauthorized Access', 
-            category: 'Access Control',
-            severity: 'medium',
-            status: 'inactive',
+            name: 'Accès à une route sensible', 
+            category: 'Reconnaissance',
+            severity: 'high',
+            status: 'active',
             created: '2024-08-22',
-            description: 'Detects attempts to access restricted resources without proper permissions.',
-            pattern: 'access_denied_count > 3',
-            action: 'alert_admin'
+            description: 'Détecte les tentatives d\'accès aux routes administratives sensibles ou protégées.',
+            action: 'Refuser l\'accès et alerter l\'administrateur',
+            plugin: 'Règle personnalisée'
+        },
+        { 
+            id: 'IDS-009', 
+            name: 'Multiples erreurs 404', 
+            category: 'Reconnaissance',
+            severity: 'medium',
+            status: 'active',
+            created: '2024-08-23',
+            description: 'Détecte plusieurs erreurs 404 depuis la même IP indiquant un balayage de chemins ou une énumération.',
+            action: 'Déclencher une alerte et surveiller l\'IP',
+            plugin: 'Règle personnalisée'
+        },
+        { 
+            id: 'IDS-010', 
+            name: 'Connexion inhabituelle', 
+            category: 'Authentification',
+            severity: 'medium',
+            status: 'active',
+            created: '2024-08-24',
+            description: 'Détecte les tentatives de connexion depuis des lieux, heures ou appareils inhabituels.',
+            action: 'Demander une vérification MFA et journaliser',
+            plugin: 'Règle personnalisée'
+        },
+        { 
+            id: 'IDS-011', 
+            name: 'Token JWT invalide', 
+            category: 'Authentification',
+            severity: 'high',
+            status: 'active',
+            created: '2024-08-25',
+            description: 'Détecte les tentatives d\'utilisation de tokens JWT invalides, expirés ou falsifiés.',
+            action: 'Refuser la requête et enregistrer l\'événement',
+            plugin: '@fastify/jwt'
+        },
+        { 
+            id: 'IDS-012', 
+            name: 'Modification de données sensible', 
+            category: 'Integrity',
+            severity: 'critical',
+            status: 'active',
+            created: '2024-08-26',
+            description: 'Détecte les modifications non autorisées de données sensibles ou de fichiers de configuration.',
+            action: 'Bloquer/confirmer l\'opération et générer une alerte critique',
+            plugin: 'Règle personnalisée'
         },
     ]
 
@@ -102,7 +146,8 @@ export default function Rules() {
             (filter === 'active' && item.status === 'active') ||
             (filter === 'inactive' && item.status === 'inactive') ||
             (filter === 'critical' && item.severity === 'critical') ||
-            (filter === 'high' && item.severity === 'high')
+            (filter === 'high' && item.severity === 'high') ||
+            (filter === 'medium' && item.severity === 'medium')
         
         return matchesFilter
     })
@@ -114,9 +159,15 @@ export default function Rules() {
             medium: 'bg-yellow-100 text-yellow-700',
             low: 'bg-blue-100 text-blue-700'
         }
+        const labels = {
+            critical: 'CRITIQUE',
+            high: 'ÉLEVÉ',
+            medium: 'MOYEN',
+            low: 'FAIBLE'
+        }
         return (
             <span className={`px-2 py-1 rounded-full text-xs font-medium ${styles[severity]}`}>
-                {severity.toUpperCase()}
+                {labels[severity]}
             </span>
         )
     }
@@ -165,107 +216,6 @@ export default function Rules() {
                 </div>
             </div>
 
-            {/* Filters */}
-            <div className="bg-white border border-gray-200 rounded-lg p-4 mb-6">
-                <div className="flex items-center gap-4">
-                    <div className="flex items-center gap-2">
-                        <Filter className="w-4 h-4 text-gray-500" />
-                    </div>
-                    <div className="flex gap-2">
-                        <button 
-                            className={`px-3 py-1.5 rounded-lg text-sm font-medium transition-colors ${
-                                filter === 'all' 
-                                    ? 'bg-gray-900 text-white' 
-                                    : 'bg-white border border-gray-300 text-gray-700 hover:bg-gray-50'
-                            }`}
-                            onClick={() => setFilter('all')}
-                        >
-                            Toutes les règles
-                        </button>
-                        <button 
-                            className={`px-3 py-1.5 rounded-lg text-sm font-medium transition-colors ${
-                                filter === 'active' 
-                                    ? 'bg-gray-900 text-white' 
-                                    : 'bg-white border border-gray-300 text-gray-700 hover:bg-gray-50'
-                            }`}
-                            onClick={() => setFilter('active')}
-                        >
-                            Actives
-                        </button>
-                        <button 
-                            className={`px-3 py-1.5 rounded-lg text-sm font-medium transition-colors ${
-                                filter === 'inactive' 
-                                    ? 'bg-gray-900 text-white' 
-                                    : 'bg-white border border-gray-300 text-gray-700 hover:bg-gray-50'
-                            }`}
-                            onClick={() => setFilter('inactive')}
-                        >
-                            Inactives
-                        </button>
-                        <button 
-                            className={`px-3 py-1.5 rounded-lg text-sm font-medium transition-colors ${
-                                filter === 'critical' 
-                                    ? 'bg-gray-900 text-white' 
-                                    : 'bg-white border border-gray-300 text-gray-700 hover:bg-gray-50'
-                            }`}
-                            onClick={() => setFilter('critical')}
-                        >
-                            Critiques
-                        </button>
-                        <button 
-                            className={`px-3 py-1.5 rounded-lg text-sm font-medium transition-colors ${
-                                filter === 'high' 
-                                    ? 'bg-gray-900 text-white' 
-                                    : 'bg-white border border-gray-300 text-gray-700 hover:bg-gray-50'
-                            }`}
-                            onClick={() => setFilter('high')}
-                        >
-                            Hautes
-                        </button>
-                    </div>
-                </div>
-            </div>
-
-            {/* Stats Cards */}
-            <div className="grid grid-cols-1 md:grid-cols-3 gap-4 mb-6">
-                <div className="bg-white border border-gray-200 rounded-lg p-4">
-                    <div className="flex items-center gap-3">
-                        <div className="w-10 h-10 bg-gray-100 rounded-lg flex items-center justify-center">
-                            <Settings className="w-5 h-5 text-gray-600" />
-                        </div>
-                        <div>
-                            <p className="text-sm text-gray-600">Total règles</p>
-                            <p className="text-xl font-bold text-gray-900">{rules.length}</p>
-                        </div>
-                    </div>
-                </div>
-                <div className="bg-white border border-gray-200 rounded-lg p-4">
-                    <div className="flex items-center gap-3">
-                        <div className="w-10 h-10 bg-green-100 rounded-lg flex items-center justify-center">
-                            <Power className="w-5 h-5 text-green-600" />
-                        </div>
-                        <div>
-                            <p className="text-sm text-gray-600">Actives</p>
-                            <p className="text-xl font-bold text-gray-900">
-                                {rules.filter(r => r.status === 'active').length}
-                            </p>
-                        </div>
-                    </div>
-                </div>
-                <div className="bg-white border border-gray-200 rounded-lg p-4">
-                    <div className="flex items-center gap-3">
-                        <div className="w-10 h-10 bg-red-100 rounded-lg flex items-center justify-center">
-                            <AlertTriangle className="w-5 h-5 text-red-600" />
-                        </div>
-                        <div>
-                            <p className="text-sm text-gray-600">Critiques</p>
-                            <p className="text-xl font-bold text-gray-900">
-                                {rules.filter(r => r.severity === 'critical').length}
-                            </p>
-                        </div>
-                    </div>
-                </div>
-            </div>
 
             {/* Rules Table */}
             <div className="bg-white border border-gray-200 rounded-lg overflow-hidden">
@@ -362,16 +312,16 @@ export default function Rules() {
                             </div>
 
                             <div>
-                                <label className="block text-sm font-medium text-gray-700 mb-1">Pattern de détection</label>
-                                <p className="text-gray-900 bg-gray-50 p-4 rounded-lg font-mono text-sm">
-                                    {selectedRule.pattern}
+                                <label className="block text-sm font-medium text-gray-700 mb-1">Action</label>
+                                <p className="text-gray-900 bg-gray-50 p-4 rounded-lg">
+                                    {selectedRule.action}
                                 </p>
                             </div>
 
                             <div>
-                                <label className="block text-sm font-medium text-gray-700 mb-1">Action</label>
-                                <p className="text-gray-900 bg-gray-50 p-4 rounded-lg">
-                                    {selectedRule.action}
+                                <label className="block text-sm font-medium text-gray-700 mb-1">Plugin / package</label>
+                                <p className="text-gray-900 bg-gray-50 p-4 rounded-lg font-mono text-sm">
+                                    {selectedRule.plugin}
                                 </p>
                             </div>
                         </div>
