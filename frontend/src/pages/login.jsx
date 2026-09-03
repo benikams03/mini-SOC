@@ -1,5 +1,5 @@
 import { useState } from 'react'
-import { useNavigate } from 'react-router-dom'
+import { useNavigate, Link } from 'react-router-dom'
 import Button from '../components/ui/button'
 
 export default function Login() {
@@ -68,6 +68,16 @@ export default function Login() {
                         </button>
                     </p>
                 </div>
+
+                <Link to="/simulation">
+                    <Button
+                        type="submit"
+                        variant="outline"
+                        className="w-full mt-8"
+                    >
+                        Accedez a l'interface de simulation
+                    </Button>
+                </Link>
             </div>
         </div>
     )

@@ -1,5 +1,5 @@
 import { Outlet, Link, useLocation } from "react-router-dom"
-import { useState } from "react"
+import { useState, useEffect } from "react"
 import { ShieldCheck, PanelRight, PanelLeft, 
     ChartColumnIncreasing, ShieldAlert, Clipboard, Users, Wrench,
     LogOut } 
@@ -8,6 +8,22 @@ import { ShieldCheck, PanelRight, PanelLeft,
 export default function Layout_admin() {
     const location = useLocation()
     const [sidebarOpen, setSidebarOpen] = useState(true)
+    const [isMobile, setIsMobile] = useState(false)
+
+    useEffect(() => {
+        const checkMobile = () => {
+            setIsMobile(window.innerWidth < 768)
+            if (window.innerWidth < 768) {
+                setSidebarOpen(false)
+            } else {
+                setSidebarOpen(true)
+            }
+        }
+
+        checkMobile()
+        window.addEventListener('resize', checkMobile)
+        return () => window.removeEventListener('resize', checkMobile)
+    }, [])
 
     const navigationItems = [
         { name: 'Dashboard', path: '/admin', icon: ChartColumnIncreasing },
@@ -26,7 +42,7 @@ export default function Layout_admin() {
             {/* Sidebar */}
             <aside 
                 className={`fixed top-0 left-0 bottom-0 z-40 transition-all duration-300 p-2.5 ${
-                    sidebarOpen ? 'w-68' : 'w-20'
+                    isMobile ? 'w-20' : (sidebarOpen ? 'w-68' : 'w-20')
                 }`}
             >
 
@@ -83,17 +99,19 @@ export default function Layout_admin() {
             {/* Main Content */}
             <main 
                 className={`transition-all duration-300 ${
-                    sidebarOpen ? 'ml-68' : 'ml-20'
+                    isMobile ? 'ml-20' : (sidebarOpen ? 'ml-68' : 'ml-20')
                 }`}
             >
                 <div className="sticky top-0 bg-white py-4 px-2 border-b border-gray-200">
 
                     <div className="flex gap-4">
 
-                        <button onClick={() => setSidebarOpen(!sidebarOpen)}
-                            className="group">
-                            <PanelRight className="group-hover:text-gray-600 transition-colors text-gray-400 cursor-pointer" size={22} />
-                        </button>
+                        {!isMobile && (
+                            <button onClick={() => setSidebarOpen(!sidebarOpen)}
+                                className="group">
+                                <PanelRight className="group-hover:text-gray-600 transition-colors text-gray-400 cursor-pointer" size={22} />
+                            </button>
+                        )}
                         
                         <div className="flex items-center gap-1">
                             {navigationItems.map((item) => {

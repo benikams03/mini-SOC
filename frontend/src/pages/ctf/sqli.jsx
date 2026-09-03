@@ -86,7 +86,7 @@ export default function SQLi() {
     ]
 
     return (
-        <div className="p-8">
+        <div className="p-4">
             <div className="max-w-4xl mx-auto">
                 {/* Header */}
                 <div className="mb-8">

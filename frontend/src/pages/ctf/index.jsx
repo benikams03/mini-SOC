@@ -82,8 +82,8 @@ export default function CTFIndex() {
     }
 
     return (
-        <div className="p-8">
-            <div className="max-w-6xl mx-auto">
+        <div className="p-4">
+            <div className="">
                 {/* Header */}
                 <div className="mb-8">
                     <h1 className="text-3xl font-bold text-gray-900 mb-2">Simulations de Sécurité</h1>
