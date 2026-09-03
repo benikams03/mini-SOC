@@ -23,7 +23,7 @@ class AuthController {
             })
 
             if ( verify_email ) {
-                await logsService.createLogCreationCompte('error', email.toLowerCase(), 'admin', req.ip)
+                // await logsService.createLogCreationCompte('error', email.toLowerCase(), 'admin', req.ip)
                 return reply.send({
                     success: false,
                     message: "Votre adresse email est déjà utilisée",
@@ -50,9 +50,9 @@ class AuthController {
 
 
             // Send welcome email
-            // await send_mail.Welcome(email);
+            await send_mail.Welcome(email.toLowerCase());
             
-            await logsService.createLogCreationCompte('success', email.toLowerCase(), 'admin', req.ip)
+            // await logsService.createLogCreationCompte('success', email.toLowerCase(), 'admin', req.ip)
 
             reply.send({
                 success: true,
@@ -80,7 +80,7 @@ class AuthController {
             });
 
             if (!user) {
-                await logsService.createLogConnexion('error', email.toLowerCase(), 'admin', req.ip)
+                // await logsService.createLogConnexion('error', email.toLowerCase(), 'admin', req.ip)
 
                 return reply.send({
                     success: false,
@@ -91,7 +91,7 @@ class AuthController {
             const isPasswordValid = await bcrypt.compare(password, user.password);
 
             if (!isPasswordValid) {
-                await logsService.createLogConnexion('error', email.toLowerCase(), 'admin', req.ip)
+                // await logsService.createLogConnexion('error', email.toLowerCase(), 'admin', req.ip)
                 
                 return reply.send({
                     success: false,
@@ -111,7 +111,7 @@ class AuthController {
                 { expiresIn: '7d' }
             )
 
-            await logsService.createLogConnexion('success', email.toLowerCase(), 'admin', req.ip)
+            // await logsService.createLogConnexion('success', email.toLowerCase(), 'admin', req.ip)
             
             reply.send({
                 success: true,
@@ -205,7 +205,7 @@ class AuthController {
             });
 
             if (!user) {
-                // await logsService.createLogConnexion('error', email.toLowerCase(), 'simulation', req.ip)
+                await logsService.createLogConnexion('error', email.toLowerCase(), 'simulation', req.ip)
 
                 return reply.send({
                     success: false,
@@ -216,7 +216,7 @@ class AuthController {
             const isPasswordValid = await bcrypt.compare(password, user.password);
 
             if (!isPasswordValid) {
-                // await logsService.createLogConnexion('error', email.toLowerCase(), 'simulation', req.ip)
+                await logsService.createLogConnexion('error', email.toLowerCase(), 'simulation', req.ip)
                 
                 return reply.send({
                     success: false,
@@ -224,7 +224,7 @@ class AuthController {
                 })
             }
 
-            // await logsService.createLogConnexion('success', email.toLowerCase(), 'simulation', req.ip)
+            await logsService.createLogConnexion('success', email.toLowerCase(), 'simulation', req.ip)
             
             reply.send({
                 success: true

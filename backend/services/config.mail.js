@@ -21,12 +21,12 @@ class MailService {
     async sendMail(email, subject, HtmlContent) {
         try {
             const mailOptions = {
-                from: `"Mini-SOC" <benikams7@gmail.com>`,
+                from: `"Mini-SOC" <kinovatech25@gmail.com>`,
                 to: email,
                 subject: subject,
                 html: HtmlContent,
                 headers: {
-                    'List-Unsubscribe': `<mailto:benikams7@gmail.com>`
+                    'List-Unsubscribe': `<mailto:kinovatech25@gmail.com>`
                 }
             }
 

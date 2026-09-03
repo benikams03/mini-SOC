@@ -2,20 +2,27 @@ import { useState } from 'react'
 import { useNavigate, Link } from 'react-router-dom'
 import Button from '../components/ui/button'
 
-export default function Login() {
+export default function Register() {
     const [email, setEmail] = useState('')
     const [password, setPassword] = useState('')
+    const [confirmPassword, setConfirmPassword] = useState('')
     const [isLoading, setIsLoading] = useState(false)
     const navigate = useNavigate()
 
     const handleSubmit = (e) => {
         e.preventDefault()
+        
+        if (password !== confirmPassword) {
+            alert('Les mots de passe ne correspondent pas')
+            return
+        }
+        
         setIsLoading(true)
         
-        // Simulate login and redirect to MFA
+        // Simulate registration and redirect to email confirmation
         setTimeout(() => {
             setIsLoading(false)
-            navigate('/mfa')
+            navigate('/email-confirmation', { state: { email } })
         }, 1000)
     }
 
@@ -23,8 +30,8 @@ export default function Login() {
         <div className="min-h-screen flex items-center justify-center bg-white">
             <div className="w-full max-w-md p-8">
                 <div className="text-center mb-8">
-                    <h1 className="text-3xl font-semibold text-gray-900 mb-2">Bienvenue</h1>
-                    <p className="text-gray-500">Connectez-vous à Mini-SOC</p>
+                    <h1 className="text-3xl font-semibold text-gray-900 mb-2">Créer un compte</h1>
+                    <p className="text-gray-500">Rejoignez Mini-SOC</p>
                 </div>
 
                 <form onSubmit={handleSubmit} className="space-y-4">
@@ -50,21 +57,32 @@ export default function Login() {
                         />
                     </div>
 
+                    <div>
+                        <input
+                            type="password"
+                            required
+                            value={confirmPassword}
+                            onChange={(e) => setConfirmPassword(e.target.value)}
+                            placeholder="Confirmer le mot de passe"
+                            className="w-full px-4 py-3 bg-gray-50 border border-gray-300 rounded-lg text-gray-900 placeholder-gray-500 focus:outline-none focus:border-gray-500 transition-colors"
+                        />
+                    </div>
+
                     <Button
                         type="submit"
                         variant="primary"
                         disabled={isLoading}
                         className="w-full"
                     >
-                        {isLoading ? 'Connexion...' : 'Continuer'}
+                        {isLoading ? 'Inscription...' : 'S\'inscrire'}
                     </Button>
                 </form>
 
                 <div className="mt-6 text-center">
                     <p className="text-gray-500 text-sm">
-                        Vous n'avez pas de compte ?{' '}
-                        <Link to="/register" className="text-gray-900 hover:underline">
-                            S'inscrire
+                        Vous avez déjà un compte ?{' '}
+                        <Link to="/login" className="text-gray-900 hover:underline">
+                            Se connecter
                         </Link>
                     </p>
                 </div>

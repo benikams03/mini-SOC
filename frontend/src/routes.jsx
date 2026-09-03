@@ -8,6 +8,8 @@ import Logs from './pages/admin/logs'
 import Rules from './pages/admin/rules'
 import Users from './pages/admin/users'
 import Login from './pages/login'
+import Register from './pages/register'
+import EmailConfirmation from './pages/email-confirmation'
 import MFA from './pages/mfa'
 import CTFIndex from './pages/ctf'
 import LoginAttack from './pages/ctf/login-attack'
@@ -24,6 +26,14 @@ export const routes = createBrowserRouter([
     {
         path: "/login",
         element: <Login />
+    },
+    {
+        path: "/register",
+        element: <Register />
+    },
+    {
+        path: "/email-confirmation",
+        element: <EmailConfirmation />
     },
     {
         path: "/mfa",
