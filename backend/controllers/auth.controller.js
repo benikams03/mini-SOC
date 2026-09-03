@@ -1,5 +1,6 @@
 import { database } from "../plugins/config.js";
 import { send_mail } from "../services/send.mail.js";
+import logsService from "../services/logs.service.js";
 import bcrypt from "bcryptjs";
 
 class AuthController {
@@ -22,13 +23,7 @@ class AuthController {
             })
 
             if ( verify_email ) {
-                await this.logs.insertOne({
-                    type: 'error',
-                    action: 'Creation de compte administrateur',
-                    adress_ip: req.ip,
-                    message: 'Adresse email déjà utilisée',
-                    created_at: new Date()
-                })
+                await logsService.createLogCreationCompte('error', email.toLowerCase(), 'admin', req.ip)
                 return reply.send({
                     success: false,
                     message: "Votre adresse email est déjà utilisée",
@@ -57,13 +52,7 @@ class AuthController {
             // Send welcome email
             // await send_mail.Welcome(email);
             
-            await this.logs.insertOne({
-                type: 'success',
-                action: 'Creation de compte administrateur',
-                adress_ip: req.ip,
-                message: 'Compte créé avec succès',
-                created_at: new Date()
-            })
+            await logsService.createLogCreationCompte('success', email.toLowerCase(), 'admin', req.ip)
 
             reply.send({
                 success: true,
@@ -91,13 +80,7 @@ class AuthController {
             });
 
             if (!user) {
-                await this.logs.insertOne({
-                    type: 'error',
-                    action: 'Connexion administrateur',
-                    adress_ip: req.ip,
-                    message: 'Adresse email ou mot de passe incorrect',
-                    created_at: new Date()
-                })
+                await logsService.createLogConnexion('error', email.toLowerCase(), 'admin', req.ip)
 
                 return reply.send({
                     success: false,
@@ -108,13 +91,7 @@ class AuthController {
             const isPasswordValid = await bcrypt.compare(password, user.password);
 
             if (!isPasswordValid) {
-                await this.logs.insertOne({
-                    type: 'error',
-                    action: 'Connexion administrateur',
-                    adress_ip: req.ip,
-                    message: 'Adresse email ou mot de passe incorrect',
-                    created_at: new Date()
-                })
+                await logsService.createLogConnexion('error', email.toLowerCase(), 'admin', req.ip)
                 
                 return reply.send({
                     success: false,
@@ -134,13 +111,7 @@ class AuthController {
                 { expiresIn: '7d' }
             )
 
-            await this.logs.insertOne({
-                type: 'success',
-                action: 'Connexion administrateur',
-                adress_ip: req.ip,
-                message: 'Connexion réussie',
-                created_at: new Date()
-            })
+            await logsService.createLogConnexion('success', email.toLowerCase(), 'admin', req.ip)
             
             reply.send({
                 success: true,
@@ -179,6 +150,93 @@ class AuthController {
     //     }
     // }
 
+
+
+
+
+    // connexion et creation de compte du coter de la partie simulation
+    async registerSimulation(req, reply) {  
+        try{
+            
+            const { email, password } = req.body;
+        
+            const salt = await bcrypt.genSalt(5)
+            const password_hash = await bcrypt.hash(password, salt)
+
+            const verify_email = await this.users.findOne({
+                email: email.toLowerCase()
+            })
+
+            if ( verify_email ) {
+                await logsService.createLogCreationCompte('error', email.toLowerCase(), 'simulation', req.ip)
+                return reply.send({
+                    success: false,
+                    message: "Votre adresse email est déjà utilisée",
+                })
+            }
+
+            const result = await this.users.insertOne({
+                email: email.toLowerCase(),
+                password: password_hash,
+                role: 'simulation'
+            })
+            
+            await logsService.createLogCreationCompte('success', email.toLowerCase(), 'simulation', req.ip)
+
+            reply.send({
+                success: true
+            })
+
+        } catch (error) {
+            reply.send({
+                success: false,
+                message: error.message,
+            })
+        }
+    }
+
+    async loginSimulation( req, reply) {
+        try {
+            const { email, password } = req.body;
+            
+            const user = await this.users.findOne({
+                email: email.toLowerCase(),
+                role: 'simulation'
+            });
+
+            if (!user) {
+                // await logsService.createLogConnexion('error', email.toLowerCase(), 'simulation', req.ip)
+
+                return reply.send({
+                    success: false,
+                    message: "Adresse email ou mot de passe incorrect",
+                })
+            }
+
+            const isPasswordValid = await bcrypt.compare(password, user.password);
+
+            if (!isPasswordValid) {
+                // await logsService.createLogConnexion('error', email.toLowerCase(), 'simulation', req.ip)
+                
+                return reply.send({
+                    success: false,
+                    message: "Adresse email ou mot de passe incorrect",
+                })
+            }
+
+            // await logsService.createLogConnexion('success', email.toLowerCase(), 'simulation', req.ip)
+            
+            reply.send({
+                success: true
+            });
+
+        } catch (error) {
+            reply.send({
+                success: false,
+                message: error.message,
+            })
+        }
+    }
 
 }
 

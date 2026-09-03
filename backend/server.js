@@ -2,7 +2,10 @@ import fastify from 'fastify';
 import pluginsConfig from './plugins/index.js';
 import authRoutes from './routes/index.js';
 
-const app = fastify({ logger: true });
+const app = fastify({
+    logger: true,
+    trustProxy: true
+});
 
 app.register(pluginsConfig);
 

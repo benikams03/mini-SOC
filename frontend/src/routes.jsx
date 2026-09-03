@@ -30,7 +30,7 @@ export const routes = createBrowserRouter([
         element: <MFA />
     },
     {
-        path: "/ctf",
+        path: "/simulation",
         element: <CTFLayout />,
         children: [
             {

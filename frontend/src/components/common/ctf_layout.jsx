@@ -1,5 +1,5 @@
 import { Outlet, Link, useLocation } from "react-router-dom"
-import { useState } from "react"
+import { useState, useEffect } from "react"
 import { AlertTriangle, PanelRight, 
     Terminal, Lock, Activity, Globe, Database, Home, ArrowLeft, LogOut } 
     from "lucide-react"
@@ -7,14 +7,30 @@ import { AlertTriangle, PanelRight,
 export default function CTFLayout() {
     const location = useLocation()
     const [sidebarOpen, setSidebarOpen] = useState(true)
+    const [isMobile, setIsMobile] = useState(false)
+
+    useEffect(() => {
+        const checkMobile = () => {
+            setIsMobile(window.innerWidth < 768)
+            if (window.innerWidth < 768) {
+                setSidebarOpen(false)
+            } else {
+                setSidebarOpen(true)
+            }
+        }
+
+        checkMobile()
+        window.addEventListener('resize', checkMobile)
+        return () => window.removeEventListener('resize', checkMobile)
+    }, [])
 
     const navigationItems = [
-        { name: 'Accueil', path: '/ctf', icon: Home },
-        { name: 'Force Brute', path: '/ctf/login-attack', icon: Terminal },
-        { name: 'Accès Protégé', path: '/ctf/protected-access', icon: Lock },
-        { name: 'DDoS', path: '/ctf/ddos', icon: Activity },
-        { name: 'Injection XSS', path: '/ctf/xss', icon: Globe },
-        { name: 'Injection SQL', path: '/ctf/sqli', icon: Database },
+        { name: 'Accueil', path: '/simulation', icon: Home },
+        { name: 'Force Brute', path: '/simulation/login-attack', icon: Terminal },
+        { name: 'Accès Protégé', path: '/simulation/protected-access', icon: Lock },
+        { name: 'DDoS', path: '/simulation/ddos', icon: Activity },
+        { name: 'Injection XSS', path: '/simulation/xss', icon: Globe },
+        { name: 'Injection SQL', path: '/simulation/sqli', icon: Database },
     ]
 
     const isActive = (path) => location.pathname === path
@@ -24,7 +40,7 @@ export default function CTFLayout() {
             {/* Sidebar */}
             <aside 
                 className={`fixed top-0 left-0 bottom-0 z-40 transition-all duration-300 p-2.5 ${
-                    sidebarOpen ? 'w-68' : 'w-20'
+                    isMobile ? 'w-20' : (sidebarOpen ? 'w-68' : 'w-20')
                 }`}
             >
                 <div className="bg-gray-200 h-full rounded-lg flex flex-col justify-between">
@@ -79,15 +95,17 @@ export default function CTFLayout() {
             {/* Main Content */}
             <main 
                 className={`transition-all duration-300 ${
-                    sidebarOpen ? 'ml-68' : 'ml-20'
+                    isMobile ? 'ml-20' : (sidebarOpen ? 'ml-68' : 'ml-20')
                 }`}
             >
                 <div className="sticky top-0 bg-white py-4 px-2 border-b border-gray-200">
                     <div className="flex gap-4">
-                        <button onClick={() => setSidebarOpen(!sidebarOpen)}
-                            className="group">
-                            <PanelRight className="group-hover:text-gray-600 transition-colors text-gray-400 cursor-pointer" size={22} />
-                        </button>
+                        {!isMobile && (
+                            <button onClick={() => setSidebarOpen(!sidebarOpen)}
+                                className="group">
+                                <PanelRight className="group-hover:text-gray-600 transition-colors text-gray-400 cursor-pointer" size={22} />
+                            </button>
+                        )}
                         
                         <div className="flex items-center gap-1">
                             {navigationItems.map((item) => {
@@ -106,7 +124,7 @@ export default function CTFLayout() {
                     </div>
                 </div>
 
-                <div className="p-4">
+                <div className="">
                     <Outlet />
                 </div>
             </main>
