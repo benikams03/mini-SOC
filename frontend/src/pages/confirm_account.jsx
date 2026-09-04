@@ -10,7 +10,7 @@ export default function ConfirmAccount() {
 
     useEffect(()=>{
         
-        localStorage.setItem('access_token', JSON.parse(access_token))
+        localStorage.setItem('access_token', access_token)
         navigate('/admin')
         
     },[]) 

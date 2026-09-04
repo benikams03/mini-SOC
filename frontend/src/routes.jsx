@@ -35,7 +35,7 @@ export const routes = createBrowserRouter([
         element: <Register />
     },
     {
-        path: "/email-confirmation",
+        path: "/email-confirmation/qwertyuijhgfdsdvbgfewertyuuysdfvcxsdfgfdertyuufewsdfvbvdssdfghjhgfddfbvcx/:email",
         element: <EmailConfirmation />
     },
     {

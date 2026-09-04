@@ -1,29 +1,38 @@
 import { useState } from 'react'
 import { useNavigate, Link } from 'react-router-dom'
 import Button from '../components/ui/button'
+import { Inscription_admin } from '../services'
+import toast from 'react-hot-toast'
+import { useForm } from 'react-hook-form'
 
 export default function Register() {
-    const [email, setEmail] = useState('')
-    const [password, setPassword] = useState('')
-    const [confirmPassword, setConfirmPassword] = useState('')
+
+    const { register, handleSubmit, reset } = useForm()
+
     const [isLoading, setIsLoading] = useState(false)
     const navigate = useNavigate()
 
-    const handleSubmit = (e) => {
-        e.preventDefault()
-        
-        if (password !== confirmPassword) {
-            alert('Les mots de passe ne correspondent pas')
-            return
-        }
-        
-        setIsLoading(true)
-        
-        // Simulate registration and redirect to email confirmation
-        setTimeout(() => {
+    const onSubmit = async (e) => {
+        try{
+            setIsLoading(true)
+            if(e['confirme-password'] !== e.password){
+                toast.error('Les mots de passe ne correspondent pas')
+                return
+            }
+            const res = await Inscription_admin(e)
+            if(res.success){
+                toast.success('Compte créé avec succès')
+                reset()
+                navigate('/email-confirmation/qwertyuijhgfdsdvbgfewertyuuysdfvcxsdfgfdertyuufewsdfvbvdssdfghjhgfddfbvcx/'+e.email)
+            }else{
+                toast.error(res.message)
+            }
+            
+        }catch(e){
+            toast.error(e.message)
+        } finally {
             setIsLoading(false)
-            navigate('/email-confirmation', { state: { email } })
-        }, 1000)
+        }
     }
 
     return (
@@ -34,13 +43,13 @@ export default function Register() {
                     <p className="text-gray-500">Rejoignez Mini-SOC</p>
                 </div>
 
-                <form onSubmit={handleSubmit} className="space-y-4">
+                <form onSubmit={handleSubmit(onSubmit)} className="space-y-4">
                     <div>
                         <input
                             type="email"
-                            required
-                            value={email}
-                            onChange={(e) => setEmail(e.target.value)}
+                            {...register('email', {
+                                required: true
+                            })}
                             placeholder="Adresse email"
                             className="w-full px-4 py-3 bg-gray-50 border border-gray-300 rounded-lg text-gray-900 placeholder-gray-500 focus:outline-none focus:border-gray-500 transition-colors"
                         />
@@ -49,9 +58,9 @@ export default function Register() {
                     <div>
                         <input
                             type="password"
-                            required
-                            value={password}
-                            onChange={(e) => setPassword(e.target.value)}
+                            {...register('password', {
+                                required: true
+                            })}
                             placeholder="Mot de passe"
                             className="w-full px-4 py-3 bg-gray-50 border border-gray-300 rounded-lg text-gray-900 placeholder-gray-500 focus:outline-none focus:border-gray-500 transition-colors"
                         />
@@ -60,9 +69,9 @@ export default function Register() {
                     <div>
                         <input
                             type="password"
-                            required
-                            value={confirmPassword}
-                            onChange={(e) => setConfirmPassword(e.target.value)}
+                            {...register('confirme-password', {
+                                required: true
+                            })}
                             placeholder="Confirmer le mot de passe"
                             className="w-full px-4 py-3 bg-gray-50 border border-gray-300 rounded-lg text-gray-900 placeholder-gray-500 focus:outline-none focus:border-gray-500 transition-colors"
                         />
