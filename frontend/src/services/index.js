@@ -23,3 +23,39 @@ export async function resend_mail_inscription_admin(data) {
         } 
     }
 }
+
+export async function login_admin(data) {
+    try{
+        const response = await api.post('/login', data);
+        return response.data;
+    } catch (error) {
+        console.error(error);
+        return {
+            success: false
+        } 
+    }
+}
+
+export async function confirm_code_login_admin(data) {
+    try{
+        const response = await api.post('/confirm-login', data);
+        return response.data;
+    } catch (error) {
+        console.error(error);
+        return {
+            success: false
+        } 
+    }
+}
+
+export async function resend_code_login_admin(data) {
+    try{
+        const response = await api.post('/resend-login', data);
+        return response.data;
+    } catch (error) {
+        console.error(error);
+        return {
+            success: false
+        } 
+    }
+}

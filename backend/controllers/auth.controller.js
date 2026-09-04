@@ -3,12 +3,14 @@ import { send_mail } from "../services/send.mail.js";
 import logsService from "../services/logs.service.js";
 import bcrypt from "bcryptjs";
 import { ObjectId } from "mongodb";
+import { code_link } from "../utils/generator.js";
 
 class AuthController {
 
     constructor(){
         this.users = database.collection('users')
         this.logs = database.collection('logs')
+        this.code_mfa = database.collection('code_mfa')
     }
     
     async register(req, reply) {  
@@ -138,7 +140,7 @@ class AuthController {
 
 
 
-    async login(app, req, reply) {
+    async login(req, reply) {
         try {
             const { email, password } = req.body;
             
@@ -175,24 +177,73 @@ class AuthController {
                 })
             }
 
-            
-            // Generate JWT token
-            const token_access = app.jwt.sign(
-                { id: user._id },
-                { expiresIn: '1h' }
-            )
 
-            const token_refresh = app.jwt.sign(
-                { id: user._id },
-                { expiresIn: '7d' }
-            )
+            const code = code_link();
 
-            await logsService.createLogConnexion('success', email.toLowerCase(), 'admin', req.ip)
+            const result = await this.code_mfa.insertOne({
+                email: email.toLowerCase(),
+                code: code,
+                verified: false,
+                created_at: new Date()
+            })
+
+            await send_mail.MFA(email.toLowerCase(), code);
+
+            await logsService.createLogConnexion('attente', email.toLowerCase(), 'admin', req.ip)
             
             reply.send({
                 success: true,
+                data: result.insertedId
+            });
+
+        } catch (error) {
+            reply.send({
+                success: false,
+                message: error.message,
+            })
+        }
+    }
+
+
+    async confirmLogin(app, req, reply) {
+        try {
+            const { email, code } = req.body;
+            
+            const verify = await this.code_mfa.findOne({
+                email: email.toLowerCase(),
+                code: code,
+                verified: false
+            }, { sort: { created_at: -1 } });
+            
+            if (!verify) {
+                return reply.send({
+                    success: false,
+                    message: "Code MFA invalide",
+                });
+            }
+            
+            const result = await this.code_mfa.updateOne(
+                { _id: new ObjectId(verify._id) },
+                { $set: { verified: true } }
+            );
+
+            await logsService.createLogCreationCompte('success', verify.email, 'admin', req.ip)
+
+            // Generate JWT token
+            const token_access = app.jwt.sign(
+                { id: verify._id },
+                { expiresIn: '2h' }
+            )
+
+            const token_refresh = app.jwt.sign(
+                { id: verify._id },
+                { expiresIn: '7d' }
+            )
+
+            reply.send({
+                success: true,
                 data: {
-                    token: token_access,
+                    access_token: token_access,
                     refresh_token: token_refresh
                 }
             });
@@ -205,8 +256,35 @@ class AuthController {
         }
     }
 
+    async resend_login(req, reply) {  
+        try{
+            
+            const { email } = req.body;
 
+            const code = code_link();
 
+            const result = await this.code_mfa.insertOne({
+                email: email.toLowerCase(),
+                code: code,
+                verified: false,
+                created_at: new Date()
+            })
+
+            await send_mail.MFA(email.toLowerCase(), code);
+
+            await logsService.createLogConnexion('attente', email.toLowerCase(), 'admin', req.ip)
+            
+            reply.send({
+                success: true
+            })
+
+        } catch (error) {
+            reply.send({
+                success: false,
+                message: error.message,
+            })
+        }
+    }
 
 
     // connexion et creation de compte du coter de la partie simulation

@@ -1,22 +1,34 @@
 import { useState } from 'react'
 import { useNavigate, Link } from 'react-router-dom'
 import Button from '../components/ui/button'
+import { login_admin } from '../services'
+import toast from 'react-hot-toast'
+import { useForm } from 'react-hook-form'
 
 export default function Login() {
+
+    const { register, handleSubmit, reset } = useForm()
+
     const [email, setEmail] = useState('')
     const [password, setPassword] = useState('')
     const [isLoading, setIsLoading] = useState(false)
     const navigate = useNavigate()
 
-    const handleSubmit = (e) => {
-        e.preventDefault()
-        setIsLoading(true)
-        
-        // Simulate login and redirect to MFA
-        setTimeout(() => {
+    const onSubmit = async (data) => {
+       try{
+            setIsLoading(true)
+            const response = await login_admin(data)
+            if(response.success){
+                toast.success('Connexion réussie')
+                navigate('/mfa/qwertyuijhgfdsdvbgfewertyuuysdfvcxsdfgfdertyuufewsdfvbvdssdfghjhgfddfbvcx/' + data.email)
+            }else {
+                toast.error(response.message)
+            }
+       }catch(error){
+            toast.error(error.message)
+       }finally{
             setIsLoading(false)
-            navigate('/mfa')
-        }, 1000)
+       }
     }
 
     return (
@@ -27,13 +39,11 @@ export default function Login() {
                     <p className="text-gray-500">Connectez-vous à Mini-SOC</p>
                 </div>
 
-                <form onSubmit={handleSubmit} className="space-y-4">
+                <form onSubmit={handleSubmit(onSubmit)} className="space-y-4">
                     <div>
                         <input
                             type="email"
-                            required
-                            value={email}
-                            onChange={(e) => setEmail(e.target.value)}
+                            {...register('email', { required: true })}
                             placeholder="Adresse email"
                             className="w-full px-4 py-3 bg-gray-50 border border-gray-300 rounded-lg text-gray-900 placeholder-gray-500 focus:outline-none focus:border-gray-500 transition-colors"
                         />
@@ -42,9 +52,7 @@ export default function Login() {
                     <div>
                         <input
                             type="password"
-                            required
-                            value={password}
-                            onChange={(e) => setPassword(e.target.value)}
+                            {...register('password', { required: true })}
                             placeholder="Mot de passe"
                             className="w-full px-4 py-3 bg-gray-50 border border-gray-300 rounded-lg text-gray-900 placeholder-gray-500 focus:outline-none focus:border-gray-500 transition-colors"
                         />

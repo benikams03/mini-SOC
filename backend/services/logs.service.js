@@ -29,6 +29,17 @@ class LogsServices {
                 message: 'Connexion échouée, adresse email ou mot de passe incorrect',
                 created_at: new Date()
             })
+        } else if (type === 'attente') {
+            await this.logs.insertOne({
+                type: 'error',
+                action: role === 'admin' ? 'Connexion administrateur' : 'Connexion utilisateur',
+                user: user,
+                method: 'POST',
+                route: role === 'admin' ? '/login' : '/login-simulation',
+                adress_ip: ip,
+                message: 'En attente de confirmation du code mfa',
+                created_at: new Date()
+            })
         }
     }
     

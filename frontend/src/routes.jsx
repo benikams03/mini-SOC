@@ -43,7 +43,7 @@ export const routes = createBrowserRouter([
         element: <ConfirmAccount />
     },
     {
-        path: "/mfa",
+        path: "/mfa/qwertyuijhgfdsdvbgfewertyuuysdfvcxsdfgfdertyuufewsdfvbvdssdfghjhgfddfbvcx/:email",
         element: <MFA />
     },
     {

@@ -39,9 +39,9 @@ export default function EmailConfirmation() {
                     <div className="mx-auto w-16 h-16 bg-gray-100 rounded-full flex items-center justify-center mb-4">
                         <Mail className="text-gray-600" size={32} />
                     </div>
-                    <h1 className="text-3xl font-semibold text-gray-900 mb-2">Vérifiez votre email</h1>
+                    <h1 className="text-3xl font-semibold text-gray-900 mb-2">Vérifiez votre email</h1><br/>
                     <p className="text-gray-500">
-                        Un email de confirmation a été envoyé à <span className="font-medium text-gray-900">{email}</span>
+                        Un email de confirmation a été envoyé à <span className="font-medium text-gray-900">{email[0]+email[1]+'**********@gmail.com'}</span>
                     </p>
                 </div>
 

@@ -4,7 +4,6 @@ class SendMail {
 
     async Welcome(email, id) {
         try{
-
             await mail_service.sendMail(
                 email, 
                 "Bienvenu sur Mini-SOC", 
@@ -13,6 +12,22 @@ class SendMail {
                     <p>Vous avez reçu cet email car vous avez créé un compte sur Mini-SOC.</p>
                     <p>Vueillez cliquez sur le lien suivant pour confirmer votre adresse email : 
                     <a href="http://localhost:5050/api/v1/confirm-register/${id}">Confirmer</a></p>
+                `);
+
+        } catch (error) {
+            console.error(error);
+        }
+    }
+    
+    async MFA(email, code) {
+        try{
+            await mail_service.sendMail(
+                email, 
+                "Code de confirmation MFA", 
+                `
+                    <h1>Code de confirmation MFA ${email}</h1>
+                    <p>Vous avez reçu cet email car vous avez demandé un code de confirmation MFA.</p>
+                    <p>Voici votre code de confirmation : ${code}</p>
                 `);
 
         } catch (error) {
