@@ -11,7 +11,7 @@ class AuthController {
         this.logs = database.collection('logs')
     }
     
-    async register(app ,req, reply) {  
+    async register(req, reply) {  
         try{
             
             const { email, password } = req.body;
@@ -24,7 +24,7 @@ class AuthController {
             })
 
             if ( verify_email ) {
-                // await logsService.createLogCreationCompte('error', email.toLowerCase(), 'admin', req.ip)
+                await logsService.createLogCreationCompte('error', email.toLowerCase(), 'admin', req.ip)
                 return reply.send({
                     success: false,
                     message: "Votre adresse email est déjà utilisée",
@@ -41,11 +41,38 @@ class AuthController {
             // Send welcome email
             await send_mail.Welcome(email.toLowerCase(), result.insertedId);
             
-            // await logsService.createLogCreationCompte('success', email.toLowerCase(), 'admin', req.ip)
+            await logsService.createLogCreationCompte('attente', email.toLowerCase(), 'admin', req.ip)
 
             reply.send({
                 success: true,
                 data: result
+            })
+
+        } catch (error) {
+            reply.send({
+                success: false,
+                message: error.message,
+            })
+        }
+    }
+
+
+    async resend_register(req, reply) {  
+        try{
+            
+            const { email } = req.body;
+
+            const get_user = await this.users.findOne({
+                email: email.toLowerCase()
+            })
+
+            // Send welcome email
+            await send_mail.Welcome(email.toLowerCase(), get_user._id);
+            
+            await logsService.createLogCreationCompte('attente', email.toLowerCase(), 'admin', req.ip)
+
+            reply.send({
+                success: true
             })
 
         } catch (error) {
@@ -77,6 +104,8 @@ class AuthController {
                 { $set: { isVerify: true } }
             );
 
+            await logsService.createLogCreationCompte('success', verify.email, 'admin', req.ip)
+
             // Generate JWT token
             const token_access = app.jwt.sign(
                 { id: id },
@@ -104,6 +133,9 @@ class AuthController {
             })
         }
     }
+
+
+
 
 
     async login(app, req, reply) {

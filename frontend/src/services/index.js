@@ -11,3 +11,15 @@ export async function Inscription_admin(data) {
         } 
     }
 }
+
+export async function resend_mail_inscription_admin(data) {
+    try{
+        const response = await api.post('/resend-register', data);
+        return response.data;
+    } catch (error) {
+        console.error(error);
+        return {
+            success: false
+        } 
+    }
+}

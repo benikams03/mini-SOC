@@ -4,7 +4,24 @@ import alertsService from "../services/alerts.service.js"
 
 export default function authRoutes (app) {
 
-    app.post('/register', (req, reply) => authController.register(app, req, reply) )
+    app.post('/register', (req, reply) => authController.register( req, reply) )
+    app.post('/resend-register',{
+        config: {
+            rateLimit: {
+                max: 5,
+                timeWindow: '1 minute',
+                errorResponseBuilder: (request, context) => {
+                    const user_agent = request.client 
+                    alertsService.createAlertLogin('admin', user_agent)
+
+                    return {
+                        success: false,
+                        message: 'Trop de requêtes. Réessayez dans une minute.',
+                    };
+                },
+            },
+        },
+    }, (req, reply) => authController.resend_register( req, reply) )
     app.get('/confirm-register/:id', (req, reply) => authController.confirmRegister(app, req, reply) )
     app.post('/login',{
         config: {

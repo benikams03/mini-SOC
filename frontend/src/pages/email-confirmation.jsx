@@ -1,22 +1,31 @@
 import { useState } from 'react'
-import { useNavigate, useLocation, Link } from 'react-router-dom'
+import { useNavigate, useLocation, Link, useParams } from 'react-router-dom'
 import { Mail, RefreshCw } from 'lucide-react'
 import Button from '../components/ui/button'
+import { resend_mail_inscription_admin } from '../services'
+import toast from 'react-hot-toast'
+
 
 export default function EmailConfirmation() {
+
+    const { email } = useParams()
     const [isResending, setIsResending] = useState(false)
     const navigate = useNavigate()
     const location = useLocation()
-    const email = location.state?.email || ''
 
-    const handleResendEmail = () => {
+    const handleResendEmail =async () => {
         setIsResending(true)
-        
-        // Simulate resending email
-        setTimeout(() => {
+        try {
+            await resend_mail_inscription_admin({
+                email: email
+            })
+            toast.success('Email de confirmation envoyé avec succès')
+        } catch (error) {
+            console.error('Error resending email:', error)
+            toast.error('Erreur lors de l\'envoi de l\'email de confirmation')
+        } finally {
             setIsResending(false)
-            alert('Email de confirmation renvoyé avec succès !')
-        }, 1500)
+        }
     }
 
     const handleBackToLogin = () => {
