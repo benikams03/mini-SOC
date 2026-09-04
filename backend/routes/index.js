@@ -5,6 +5,7 @@ import alertsService from "../services/alerts.service.js"
 export default function authRoutes (app) {
 
     app.post('/register', (req, reply) => authController.register(app, req, reply) )
+    app.get('/confirm-register/:id', (req, reply) => authController.confirmRegister(app, req, reply) )
     app.post('/login',{
         config: {
             rateLimit: {

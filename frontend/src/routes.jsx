@@ -17,6 +17,9 @@ import ProtectedAccess from './pages/ctf/protected-access'
 import DDoS from './pages/ctf/ddos'
 import XSS from './pages/ctf/xss'
 import SQLi from './pages/ctf/sqli'
+import ConfirmAccount from './pages/confirm_account'
+
+import { ProtectedRoute } from './lib/middleware'
 
 export const routes = createBrowserRouter([
     {
@@ -34,6 +37,10 @@ export const routes = createBrowserRouter([
     {
         path: "/email-confirmation",
         element: <EmailConfirmation />
+    },
+    {
+        path: "/confirm-account",
+        element: <ConfirmAccount />
     },
     {
         path: "/mfa",
@@ -71,7 +78,7 @@ export const routes = createBrowserRouter([
     },
     {
         path: "/admin",
-        element: <Layout_admin />,
+        element: <ProtectedRoute><Layout_admin /></ProtectedRoute>,
         children: [
             {
                 path: "",

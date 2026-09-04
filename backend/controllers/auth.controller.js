@@ -2,6 +2,7 @@ import { database } from "../plugins/config.js";
 import { send_mail } from "../services/send.mail.js";
 import logsService from "../services/logs.service.js";
 import bcrypt from "bcryptjs";
+import { ObjectId } from "mongodb";
 
 class AuthController {
 
@@ -33,34 +34,68 @@ class AuthController {
             const result = await this.users.insertOne({
                 email: email.toLowerCase(),
                 password: password_hash,
-                role: 'admin'
+                role: 'admin',
+                isVerify: false
             })
 
-
-            // Generate JWT token
-            const token_access = app.jwt.sign(
-                { id: result.insertedId },
-                { expiresIn: '1h' }
-            )
-
-            const token_refresh = app.jwt.sign(
-                { id: result.insertedId },
-                { expiresIn: '7d' }
-            )
-
-
             // Send welcome email
-            await send_mail.Welcome(email.toLowerCase());
+            await send_mail.Welcome(email.toLowerCase(), result.insertedId);
             
             // await logsService.createLogCreationCompte('success', email.toLowerCase(), 'admin', req.ip)
 
             reply.send({
                 success: true,
-                data: {
-                    token: token_access,
-                    refresh_token: token_refresh
-                }
+                data: result
             })
+
+        } catch (error) {
+            reply.send({
+                success: false,
+                message: error.message,
+            })
+        }
+    }
+
+
+    async confirmRegister(app, req, reply) {
+        try {
+            const { id } = req.params;
+            
+            const verify = await this.users.findOne({
+                _id: new ObjectId(id)
+            });
+            
+            if (!verify) {
+                return reply.send({
+                    success: false,
+                    message: "Utilisateur non trouvé",
+                });
+            }
+            
+            const result = await this.users.updateOne(
+                { _id: new ObjectId(id) },
+                { $set: { isVerify: true } }
+            );
+
+            // Generate JWT token
+            const token_access = app.jwt.sign(
+                { id: id },
+                { expiresIn: '1h' }
+            )
+
+            const token_refresh = app.jwt.sign(
+                { id: id },
+                { expiresIn: '7d' }
+            )
+
+            // redirection vers un site web
+            reply.redirect('http://localhost:5173/confirm-account?access_token='+ token_access + '&refresh_token=' + token_refresh);
+            // reply.redirect('https://mini-soc-unikin.vercel.app/confirm-account?access_token='+ token_access + '&refresh_token=' + token_refresh);
+
+            reply.send({
+                success: true,
+                message: "Email confirmé avec succès"
+            });
 
         } catch (error) {
             reply.send({
@@ -80,7 +115,7 @@ class AuthController {
             });
 
             if (!user) {
-                // await logsService.createLogConnexion('error', email.toLowerCase(), 'admin', req.ip)
+                await logsService.createLogConnexion('error', email.toLowerCase(), 'admin', req.ip)
 
                 return reply.send({
                     success: false,
@@ -88,10 +123,19 @@ class AuthController {
                 })
             }
 
+            if (!user.isVerify) {
+                await logsService.createLogConnexion('error', email.toLowerCase(), 'admin', req.ip)
+
+                return reply.send({
+                    success: false,
+                    message: "Veuillez confirmer votre adresse email",
+                })
+            }
+
             const isPasswordValid = await bcrypt.compare(password, user.password);
 
             if (!isPasswordValid) {
-                // await logsService.createLogConnexion('error', email.toLowerCase(), 'admin', req.ip)
+                await logsService.createLogConnexion('error', email.toLowerCase(), 'admin', req.ip)
                 
                 return reply.send({
                     success: false,
@@ -111,7 +155,7 @@ class AuthController {
                 { expiresIn: '7d' }
             )
 
-            // await logsService.createLogConnexion('success', email.toLowerCase(), 'admin', req.ip)
+            await logsService.createLogConnexion('success', email.toLowerCase(), 'admin', req.ip)
             
             reply.send({
                 success: true,
@@ -128,27 +172,6 @@ class AuthController {
             })
         }
     }
-
-    // async confirmEmail(app, req, reply) {
-    //     try {
-    //         const { email } = req.params;
-            
-    //         const result = await this.users.updateOne(
-    //             { email: email.toLowerCase() },
-    //             { $set: { confirmed: true } }
-    //         );
-
-    //         reply.send({
-    //             success: true,
-    //             message: "Email confirmé avec succès"
-    //         });
-    //     } catch (error) {
-    //         reply.send({
-    //             success: false,
-    //             message: error.message,
-    //         })
-    //     }
-    // }
 
 
 
@@ -178,7 +201,8 @@ class AuthController {
             const result = await this.users.insertOne({
                 email: email.toLowerCase(),
                 password: password_hash,
-                role: 'simulation'
+                role: 'simulation',
+                isVerify: true
             })
             
             await logsService.createLogCreationCompte('success', email.toLowerCase(), 'simulation', req.ip)
