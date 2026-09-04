@@ -1,8 +1,15 @@
 import { useState, useEffect, useRef } from 'react'
-import { useNavigate } from 'react-router-dom'
+import { useNavigate, useParams } from 'react-router-dom'
 import Button from '../components/ui/button'
+import { useForm } from 'react-hook-form'
+import toast from 'react-hot-toast'
+import { confirm_code_login_admin, resend_code_login_admin } from '../services'
 
 export default function MFA() {
+    
+    const { email } = useParams()
+    const { register, handleSubmit, formState: { errors } } = useForm()
+
     const [codes, setCodes] = useState(['', '', '', '', ''])
     const [timer, setTimer] = useState(60)
     const [canResend, setCanResend] = useState(false)
@@ -42,28 +49,45 @@ export default function MFA() {
         }
     }
 
-    const handleResend = () => {
-        setTimer(60)
-        setCanResend(false)
-        setCodes(['', '', '', '', ''])
-        inputRefs.current[0]?.focus()
+    const handleResend = async () => {
+        try{
+            const response = await resend_code_login_admin({ 
+                email: email 
+            })
+            if(response.success){
+                toast.success('Code de confirmation envoyé avec succès')
+                setTimer(60)
+                setCanResend(false)
+                setCodes(['', '', '', '', ''])
+                inputRefs.current[0]?.focus()
+            }else {
+                toast.error(response.message)
+            }
+        } catch (error) {
+            toast.error('Erreur lors de l\'envoi du code de confirmation')
+        }
     }
 
-    const handleSubmit = (e) => {
-        e.preventDefault()
-        const code = codes.join('')
-        
-        if (code.length !== 5) {
-            return
-        }
-
-        setIsLoading(true)
-        
-        // Simulate MFA verification and redirect to admin
-        setTimeout(() => {
+    const onSubmit = async (data) => {
+        try {
+            setIsLoading(true)
+            const code = codes.join('')
+            const response = await confirm_code_login_admin({ 
+                email: email, 
+                code: code 
+            })
+            if(response.success){
+                toast.success('Code vérifié avec succès')
+                localStorage.setItem('access_token', response.data.access_token)
+                navigate('/admin')
+            }else {
+                toast.error(response.message)
+            }
+        } catch (error) {
+            toast.error('Erreur lors de la vérification du code')
+        } finally {
             setIsLoading(false)
-            navigate('/admin')
-        }, 1000)
+        }
     }
 
     const formatTime = (seconds) => {
@@ -82,7 +106,7 @@ export default function MFA() {
                     </p>
                 </div>
 
-                <form onSubmit={handleSubmit} className="space-y-6">
+                <form onSubmit={handleSubmit(onSubmit)} className="space-y-6">
                     <div className="flex justify-center gap-3">
                         {codes.map((code, index) => (
                             <input

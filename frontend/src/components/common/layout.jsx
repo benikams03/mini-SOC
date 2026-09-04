@@ -1,4 +1,4 @@
-import { Outlet, Link, useLocation } from "react-router-dom"
+import { Outlet, Link, useLocation, useNavigate } from "react-router-dom"
 import { useState, useEffect } from "react"
 import { ShieldCheck, PanelRight, PanelLeft, 
     ChartColumnIncreasing, ShieldAlert, Clipboard, Users, Wrench,
@@ -6,6 +6,8 @@ import { ShieldCheck, PanelRight, PanelLeft,
     from "lucide-react"
 
 export default function Layout_admin() {
+
+    const navigate = useNavigate()
     const location = useLocation()
     const [sidebarOpen, setSidebarOpen] = useState(true)
     const [isMobile, setIsMobile] = useState(false)
@@ -81,7 +83,12 @@ export default function Layout_admin() {
                     </div>
 
                     <div className="m-2" >
-                        <button className="bg-white rounded-md p-2 flex items-center gap-2 cursor-pointer w-full">
+                        <button
+                        onClick={()=>{
+                            localStorage.removeItem('access_token')
+                            navigate('/login')
+                        }}
+                        className="bg-white rounded-md p-2 flex items-center gap-2 cursor-pointer w-full">
                             <div className="bg-gray-300 p-2 rounded-md">
                                <LogOut size={12} />
                             </div>

@@ -8,6 +8,8 @@ import Logs from './pages/admin/logs'
 import Rules from './pages/admin/rules'
 import Users from './pages/admin/users'
 import Login from './pages/login'
+import Register from './pages/register'
+import EmailConfirmation from './pages/email-confirmation'
 import MFA from './pages/mfa'
 import CTFIndex from './pages/ctf'
 import LoginAttack from './pages/ctf/login-attack'
@@ -15,6 +17,9 @@ import ProtectedAccess from './pages/ctf/protected-access'
 import DDoS from './pages/ctf/ddos'
 import XSS from './pages/ctf/xss'
 import SQLi from './pages/ctf/sqli'
+import ConfirmAccount from './pages/confirm_account'
+
+import { ProtectedRoute } from './lib/middleware'
 
 export const routes = createBrowserRouter([
     {
@@ -26,7 +31,19 @@ export const routes = createBrowserRouter([
         element: <Login />
     },
     {
-        path: "/mfa",
+        path: "/register",
+        element: <Register />
+    },
+    {
+        path: "/email-confirmation/qwertyuijhgfdsdvbgfewertyuuysdfvcxsdfgfdertyuufewsdfvbvdssdfghjhgfddfbvcx/:email",
+        element: <EmailConfirmation />
+    },
+    {
+        path: "/confirm-account",
+        element: <ConfirmAccount />
+    },
+    {
+        path: "/mfa/qwertyuijhgfdsdvbgfewertyuuysdfvcxsdfgfdertyuufewsdfvbvdssdfghjhgfddfbvcx/:email",
         element: <MFA />
     },
     {
@@ -61,7 +78,7 @@ export const routes = createBrowserRouter([
     },
     {
         path: "/admin",
-        element: <Layout_admin />,
+        element: <ProtectedRoute><Layout_admin /></ProtectedRoute>,
         children: [
             {
                 path: "",
