@@ -78,7 +78,7 @@ export default function MFA() {
             })
             if(response.success){
                 toast.success('Code vérifié avec succès')
-                localStorage.setItem('access_token', response.access_token)
+                localStorage.setItem('access_token', response.data.access_token)
                 navigate('/admin')
             }else {
                 toast.error(response.message)

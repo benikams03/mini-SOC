@@ -228,7 +228,6 @@ export default function Rules() {
                                 <th className="text-left py-3 px-4 font-medium text-gray-500">Catégorie</th>
                                 <th className="text-left py-3 px-4 font-medium text-gray-500">Sévérité</th>
                                 <th className="text-left py-3 px-4 font-medium text-gray-500">Statut</th>
-                                <th className="text-left py-3 px-4 font-medium text-gray-500">Créée le</th>
                                 <th className="text-left py-3 px-4 font-medium text-gray-500">Actions</th>
                             </tr>
                         </thead>
@@ -251,9 +250,6 @@ export default function Rules() {
                                     </td>
                                     <td className="py-3 px-4">
                                         {getStatusBadge(rule.status)}
-                                    </td>
-                                    <td className="py-3 px-4">
-                                        <span className="text-sm text-gray-500">{rule.created}</span>
                                     </td>
                                     <td className="py-3 px-4">
                                         <button 

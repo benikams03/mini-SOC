@@ -72,7 +72,12 @@ export default function authRoutes (app) {
         },
     }, (req, reply) => authController.loginSimulation(req, reply) )
 
-    app.get('/logs', (req, reply) => logsController.get(req, reply) )
+
+    
+
+    app.get('/logs',{
+        preHandler: [app.authenticate]
+    } ,(req, reply) => logsController.get(req, reply) )
 
 
 }
