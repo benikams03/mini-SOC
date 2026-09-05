@@ -58,7 +58,7 @@ export default function authRoutes (app) {
     app.post('/login-simulation',{
         config: {
             rateLimit: {
-                max: 2,
+                max: 5,
                 timeWindow: '1 minute',
                 errorResponseBuilder: (request, context) => {
                     const user_agent = request.client 
