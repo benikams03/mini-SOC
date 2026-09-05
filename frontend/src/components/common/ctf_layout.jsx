@@ -50,7 +50,7 @@ export default function CTFLayout() {
                                 <div className="bg-black inline-block p-1 rounded-md">
                                     <AlertTriangle className="text-white" />
                                 </div>
-                                { sidebarOpen && <h2 className="text-xl font-bold text-gray-800">CTF Lab</h2> }
+                                { sidebarOpen && <h2 className="text-xl font-bold text-gray-800">Lab test</h2> }
                             </div>
                         </div>
 

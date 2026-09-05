@@ -37,7 +37,8 @@ class AuthController {
                 email: email.toLowerCase(),
                 password: password_hash,
                 role: 'admin',
-                isVerify: false
+                isVerify: false,
+                created_at: new Date()
             })
 
             // Send welcome email
@@ -312,7 +313,8 @@ class AuthController {
                 email: email.toLowerCase(),
                 password: password_hash,
                 role: 'simulation',
-                isVerify: true
+                isVerify: true,
+                created_at: new Date()
             })
             
             await logsService.createLogCreationCompte('success', email.toLowerCase(), 'simulation', req.ip)

@@ -17,7 +17,7 @@ export default function CTFIndex() {
             name: 'Attaque par force brute',
             description: 'Simulez une attaque par force brute sur un formulaire de connexion. Apprenez à détecter et bloquer ce type d\'attaque.',
             icon: Terminal,
-            path: '/ctf/login-attack',
+            path: '/simulation/login-attack',
             difficulty: 'Facile',
             category: 'Authentification'
         },
@@ -26,7 +26,7 @@ export default function CTFIndex() {
             name: 'Accès page protégée',
             description: 'Tentez d\'accéder à une page protégée sans autorisation. Comprenez les mécanismes de contrôle d\'accès.',
             icon: Lock,
-            path: '/ctf/protected-access',
+            path: '/simulation/protected-access',
             difficulty: 'Moyen',
             category: 'Autorisation'
         },
@@ -35,7 +35,7 @@ export default function CTFIndex() {
             name: 'Requêtes simultanées',
             description: 'Simulez une attaque par déni de service en envoyant de multiples requêtes simultanées.',
             icon: Activity,
-            path: '/ctf/ddos',
+            path: '/simulation/ddos',
             difficulty: 'Difficile',
             category: 'Réseau'
         },
@@ -44,7 +44,7 @@ export default function CTFIndex() {
             name: 'Injection XSS',
             description: 'Exploitez une vulnérabilité XSS pour injecter du code malveillant dans une application web.',
             icon: Globe,
-            path: '/ctf/xss',
+            path: '/simulation/xss',
             difficulty: 'Moyen',
             category: 'Injection'
         },
@@ -53,7 +53,7 @@ export default function CTFIndex() {
             name: 'Injection SQL',
             description: 'Découvrez et exploitez des vulnérabilités d\'injection SQL dans une base de données.',
             icon: Database,
-            path: '/ctf/sqli',
+            path: '/simulation/sqli',
             difficulty: 'Difficile',
             category: 'Injection'
         },
@@ -62,7 +62,7 @@ export default function CTFIndex() {
             name: 'Reconnaissance',
             description: 'Effectuez une reconnaissance passive et active sur une cible pour identifier des informations sensibles.',
             icon: Shield,
-            path: '/ctf/reconnaissance',
+            path: '/simulation/reconnaissance',
             difficulty: 'Facile',
             category: 'Reconnaissance'
         },
@@ -132,22 +132,7 @@ export default function CTFIndex() {
                     })}
                 </div>
 
-                {/* Info Box */}
-                <div className="mt-8 bg-blue-50 border border-blue-200 rounded-lg p-6">
-                    <div className="flex items-start gap-4">
-                        <div className="w-10 h-10 bg-blue-100 rounded-lg flex items-center justify-center flex-shrink-0">
-                            <Shield className="w-5 h-5 text-blue-600" />
-                        </div>
-                        <div>
-                            <h3 className="font-semibold text-gray-900 mb-1">Environnement de formation</h3>
-                            <p className="text-sm text-gray-600">
-                                Ces simulations sont conçues uniquement à des fins éducatives. Elles vous permettent de comprendre 
-                                les vecteurs d'attaque dans un environnement contrôlé et sécurisé. Toute tentative d'utilisation 
-                                de ces techniques sur des systèmes non autorisés est illégale.
-                            </p>
-                        </div>
-                    </div>
-                </div>
+                
             </div>
         </div>
     )

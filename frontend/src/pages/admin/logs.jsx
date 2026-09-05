@@ -1,8 +1,11 @@
 import { useState, useEffect } from 'react'
 import { Filter, Eye, FileText, AlertTriangle, Info, AlertCircle, Clock } from 'lucide-react'
 import { get_logs } from '../../services/logs.js'
+import { useNavigate } from 'react-router-dom'
 
 export default function Logs() {
+
+    const navigate = useNavigate()
     const [selectedLog, setSelectedLog] = useState(null)
     const [isModalOpen, setIsModalOpen] = useState(false)
     const [filter, setFilter] = useState('all')
@@ -14,7 +17,7 @@ export default function Logs() {
         const fetchLogs = async () => {
             try {
                 const response = await get_logs()
-                console.log('Response from API:', response)
+                console.log(response)
                 
                 if (response.success) {
                     // Transformer les données de la base de données pour correspondre à la structure attendue
@@ -34,7 +37,12 @@ export default function Logs() {
                     transformedLogs.sort((a, b) => b.originalDate - a.originalDate)
                     setLogs(transformedLogs)
                 } else {
-                    setError('Erreur lors du chargement des logs')
+                    if(response.token_invalid){
+                        localStorage.removeItem('access_token')
+                        navigate('/login')
+                    }else{
+                        setError('Erreur lors du chargement des logs')
+                    }
                 }
             } catch (err) {
                 setError('Erreur de connexion au serveur')

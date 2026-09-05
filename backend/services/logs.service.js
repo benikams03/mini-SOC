@@ -31,7 +31,7 @@ class LogsServices {
             })
         } else if (type === 'attente') {
             await this.logs.insertOne({
-                type: 'error',
+                type: 'attente',
                 action: role === 'admin' ? 'Connexion administrateur' : 'Connexion utilisateur',
                 user: user,
                 method: 'POST',
@@ -75,6 +75,32 @@ class LogsServices {
                 route: role === 'admin' ? '/register' : '/register-simulation',
                 adress_ip: ip,
                 message: 'Creation de compte en attente de confirmation',
+                created_at: new Date()
+            })
+        }
+    }
+
+    async createLogDataRetrieval(type, dataType, ip) {
+        if (type === 'success') {
+            await this.logs.insertOne({
+                type: 'success',
+                action: `Récupération des données - ${dataType}`,
+                user: 'admin',
+                method: 'GET',
+                route: dataType === 'logs' ? '/logs' : dataType === 'alerts' ? '/alerts' : '/users',
+                adress_ip: ip,
+                message: `Récupération des ${dataType} réussie`,
+                created_at: new Date()
+            })
+        } else if (type === 'error') {
+            await this.logs.insertOne({
+                type: 'error',
+                action: `Récupération des données - ${dataType}`,
+                user: 'admin',
+                method: 'GET',
+                route: dataType === 'logs' ? '/logs' : dataType === 'alerts' ? '/alerts' : '/users',
+                adress_ip: ip,
+                message: `Récupération des ${dataType} échouée`,
                 created_at: new Date()
             })
         }
