@@ -132,22 +132,7 @@ export default function CTFIndex() {
                     })}
                 </div>
 
-                {/* Info Box */}
-                <div className="mt-8 bg-blue-50 border border-blue-200 rounded-lg p-6">
-                    <div className="flex items-start gap-4">
-                        <div className="w-10 h-10 bg-blue-100 rounded-lg flex items-center justify-center flex-shrink-0">
-                            <Shield className="w-5 h-5 text-blue-600" />
-                        </div>
-                        <div>
-                            <h3 className="font-semibold text-gray-900 mb-1">Environnement de formation</h3>
-                            <p className="text-sm text-gray-600">
-                                Ces simulations sont conçues uniquement à des fins éducatives. Elles vous permettent de comprendre 
-                                les vecteurs d'attaque dans un environnement contrôlé et sécurisé. Toute tentative d'utilisation 
-                                de ces techniques sur des systèmes non autorisés est illégale.
-                            </p>
-                        </div>
-                    </div>
-                </div>
+                
             </div>
         </div>
     )

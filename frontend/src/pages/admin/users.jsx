@@ -1,81 +1,45 @@
-import { useState } from 'react'
+import { useState, useEffect } from 'react'
 import { Users as UsersIcon, Plus, Eye, Shield, Clock } from 'lucide-react'
+import { get_users, register_simulation } from '../../services/index.js'
 
 export default function Users() {
     const [selectedUser, setSelectedUser] = useState(null)
     const [isModalOpen, setIsModalOpen] = useState(false)
     const [isAddModalOpen, setIsAddModalOpen] = useState(false)
     const [filter, setFilter] = useState('all')
+    const [users, setUsers] = useState([])
+    const [loading, setLoading] = useState(false)
 
     const [newUser, setNewUser] = useState({
-        username: '',
         email: '',
         password: ''
     })
 
-    const users = [
-        { 
-            id: 1, 
-            username: 'admin', 
-            email: 'admin@minisoc.com',
-            role: 'admin',
-            status: 'active',
-            created: '2024-08-15',
-            lastLogin: '2024-08-28 11:25:00'
-        },
-        { 
-            id: 2, 
-            username: 'security_analyst', 
-            email: 'analyst@minisoc.com',
-            role: 'analyst',
-            status: 'active',
-            created: '2024-08-16',
-            lastLogin: '2024-08-28 10:15:00'
-        },
-        { 
-            id: 3, 
-            username: 'operator_1', 
-            email: 'operator1@minisoc.com',
-            role: 'operator',
-            status: 'active',
-            created: '2024-08-17',
-            lastLogin: '2024-08-28 09:30:00'
-        },
-        { 
-            id: 4, 
-            username: 'operator_2', 
-            email: 'operator2@minisoc.com',
-            role: 'operator',
-            status: 'inactive',
-            created: '2024-08-18',
-            lastLogin: '2024-08-27 16:45:00'
-        },
-        { 
-            id: 5, 
-            username: 'auditor', 
-            email: 'auditor@minisoc.com',
-            role: 'auditor',
-            status: 'active',
-            created: '2024-08-19',
-            lastLogin: '2024-08-28 08:00:00'
-        },
-        { 
-            id: 6, 
-            username: 'manager', 
-            email: 'manager@minisoc.com',
-            role: 'manager',
-            status: 'active',
-            created: '2024-08-20',
-            lastLogin: '2024-08-28 11:00:00'
-        },
-    ]
+    // Charger les utilisateurs au montage du composant
+    useEffect(() => {
+        loadUsers()
+    }, [])
+
+    const loadUsers = async () => {
+        setLoading(true)
+        try {
+            const response = await get_users()
+            if (response.success) {
+                setUsers(response.data)
+            }
+        } catch (error) {
+            console.error('Erreur lors du chargement des utilisateurs:', error)
+        } finally {
+            setLoading(false)
+        }
+    }
 
     const filteredUsers = users.filter(item => {
         const matchesFilter = filter === 'all' || 
-            (filter === 'active' && item.status === 'active') ||
-            (filter === 'inactive' && item.status === 'inactive') ||
+            (filter === 'active' && item.isVerify === true) ||
+            (filter === 'inactive' && item.isVerify === false) ||
             (filter === 'admin' && item.role === 'admin') ||
-            (filter === 'analyst' && item.role === 'analyst')
+            (filter === 'simulation' && item.role === 'simulation')
         
         return matchesFilter
     })
@@ -83,26 +47,23 @@ export default function Users() {
     const getRoleBadge = (role) => {
         const styles = {
             admin: 'bg-purple-100 text-purple-700',
-            analyst: 'bg-blue-100 text-blue-700',
-            operator: 'bg-green-100 text-green-700',
-            auditor: 'bg-orange-100 text-orange-700',
-            manager: 'bg-gray-100 text-gray-700'
+            simulation: 'bg-blue-100 text-blue-700'
         }
         return (
-            <span className={`px-2 py-1 rounded-full text-xs font-medium ${styles[role]}`}>
+            <span className={`px-2 py-1 rounded-full text-xs font-medium ${styles[role] || 'bg-gray-100 text-gray-700'}`}>
                 {role.charAt(0).toUpperCase() + role.slice(1)}
             </span>
         )
     }
 
-    const getStatusBadge = (status) => {
+    const getStatusBadge = (isVerify) => {
         const styles = {
-            active: 'bg-green-100 text-green-700',
-            inactive: 'bg-gray-100 text-gray-700'
+            true: 'bg-green-100 text-green-700',
+            false: 'bg-gray-100 text-gray-700'
         }
         return (
-            <span className={`px-2 py-1 rounded-full text-xs font-medium ${styles[status]}`}>
-                {status === 'active' ? 'Actif' : 'Inactif'}
+            <span className={`px-2 py-1 rounded-full text-xs font-medium ${styles[isVerify]}`}>
+                {isVerify ? 'Actif' : 'Inactif'}
             </span>
         )
     }
@@ -123,14 +84,24 @@ export default function Users() {
 
     const closeAddModal = () => {
         setIsAddModalOpen(false)
-        setNewUser({ username: '', email: '', password: '' })
+        setNewUser({ email: '', password: '' })
     }
 
-    const handleSaveUser = (e) => {
+    const handleSaveUser = async (e) => {
         e.preventDefault()
-        // Here you would typically save the user to your backend
-        console.log('Saving user:', newUser)
-        closeAddModal()
+        try {
+            const response = await register_simulation(newUser)
+            if (response.success) {
+                // Recharger la liste des utilisateurs
+                await loadUsers()
+                closeAddModal()
+            } else {
+                alert('Erreur lors de la création de l\'utilisateur: ' + response.message)
+            }
+        } catch (error) {
+            console.error('Erreur lors de la création de l\'utilisateur:', error)
+            alert('Erreur lors de la création de l\'utilisateur')
+        }
     }
 
     return (
@@ -156,124 +127,29 @@ export default function Users() {
                 </div>
             </div>
 
-            {/* Filters */}
-            <div className="bg-white border border-gray-200 rounded-lg p-4 mb-6">
-                <div className="flex items-center gap-4">
-                    <div className="flex gap-2">
-                        <button 
-                            className={`px-3 py-1.5 rounded-lg text-sm font-medium transition-colors ${
-                                filter === 'all' 
-                                    ? 'bg-gray-900 text-white' 
-                                    : 'bg-white border border-gray-300 text-gray-700 hover:bg-gray-50'
-                            }`}
-                            onClick={() => setFilter('all')}
-                        >
-                            Tous les utilisateurs
-                        </button>
-                        <button 
-                            className={`px-3 py-1.5 rounded-lg text-sm font-medium transition-colors ${
-                                filter === 'active' 
-                                    ? 'bg-gray-900 text-white' 
-                                    : 'bg-white border border-gray-300 text-gray-700 hover:bg-gray-50'
-                            }`}
-                            onClick={() => setFilter('active')}
-                        >
-                            Actifs
-                        </button>
-                        <button 
-                            className={`px-3 py-1.5 rounded-lg text-sm font-medium transition-colors ${
-                                filter === 'inactive' 
-                                    ? 'bg-gray-900 text-white' 
-                                    : 'bg-white border border-gray-300 text-gray-700 hover:bg-gray-50'
-                            }`}
-                            onClick={() => setFilter('inactive')}
-                        >
-                            Inactifs
-                        </button>
-                        <button 
-                            className={`px-3 py-1.5 rounded-lg text-sm font-medium transition-colors ${
-                                filter === 'admin' 
-                                    ? 'bg-gray-900 text-white' 
-                                    : 'bg-white border border-gray-300 text-gray-700 hover:bg-gray-50'
-                            }`}
-                            onClick={() => setFilter('admin')}
-                        >
-                            Admins
-                        </button>
-                        <button 
-                            className={`px-3 py-1.5 rounded-lg text-sm font-medium transition-colors ${
-                                filter === 'analyst' 
-                                    ? 'bg-gray-900 text-white' 
-                                    : 'bg-white border border-gray-300 text-gray-700 hover:bg-gray-50'
-                            }`}
-                            onClick={() => setFilter('analyst')}
-                        >
-                            Analystes
-                        </button>
-                    </div>
-                </div>
-            </div>
-
-            {/* Stats Cards */}
-            <div className="grid grid-cols-1 md:grid-cols-3 gap-4 mb-6">
-                <div className="bg-white border border-gray-200 rounded-lg p-4">
-                    <div className="flex items-center gap-3">
-                        <div className="w-10 h-10 bg-gray-100 rounded-lg flex items-center justify-center">
-                            <UsersIcon className="w-5 h-5 text-gray-600" />
-                        </div>
-                        <div>
-                            <p className="text-sm text-gray-600">Total utilisateurs</p>
-                            <p className="text-xl font-bold text-gray-900">{users.length}</p>
-                        </div>
-                    </div>
-                </div>
-                <div className="bg-white border border-gray-200 rounded-lg p-4">
-                    <div className="flex items-center gap-3">
-                        <div className="w-10 h-10 bg-green-100 rounded-lg flex items-center justify-center">
-                            <Shield className="w-5 h-5 text-green-600" />
-                        </div>
-                        <div>
-                            <p className="text-sm text-gray-600">Actifs</p>
-                            <p className="text-xl font-bold text-gray-900">
-                                {users.filter(u => u.status === 'active').length}
-                            </p>
-                        </div>
-                    </div>
-                </div>
-                <div className="bg-white border border-gray-200 rounded-lg p-4">
-                    <div className="flex items-center gap-3">
-                        <div className="w-10 h-10 bg-purple-100 rounded-lg flex items-center justify-center">
-                            <Shield className="w-5 h-5 text-purple-600" />
-                        </div>
-                        <div>
-                            <p className="text-sm text-gray-600">Admins</p>
-                            <p className="text-xl font-bold text-gray-900">
-                                {users.filter(u => u.role === 'admin').length}
-                            </p>
-                        </div>
-                    </div>
-                </div>
-            </div>
-
             {/* Users Table */}
             <div className="bg-white border border-gray-200 rounded-lg overflow-hidden">
-                <div className="overflow-x-auto">
+                {loading ? (
+                    <div className="flex items-center justify-center py-20">
+                        <div className="text-gray-500">Chargement des utilisateurs...</div>
+                    </div>
+                ) : (
+                    <div className="overflow-x-auto">
                     <table className="w-full">
                         <thead className="bg-gray-50 border-b border-gray-200">
                             <tr>
-                                <th className="text-left py-3 px-4 font-medium text-gray-500">Nom d'utilisateur</th>
+                                <th className="text-left py-3 px-4 font-medium text-gray-500">Index</th>
                                 <th className="text-left py-3 px-4 font-medium text-gray-500">Email</th>
                                 <th className="text-left py-3 px-4 font-medium text-gray-500">Rôle</th>
-                                <th className="text-left py-3 px-4 font-medium text-gray-500">Statut</th>
                                 <th className="text-left py-3 px-4 font-medium text-gray-500">Créé le</th>
                                 <th className="text-left py-3 px-4 font-medium text-gray-500">Actions</th>
                             </tr>
                         </thead>
                         <tbody className="divide-y divide-gray-200">
-                            {filteredUsers.map((user) => (
-                                <tr key={user.id} className="hover:bg-gray-50">
+                            {filteredUsers.map((user, index) => (
+                                <tr key={user._id} className="hover:bg-gray-50">
                                     <td className="py-3 px-4">
-                                        <span className="text-sm font-medium text-gray-900">{user.username}</span>
+                                        <span className="text-sm text-gray-900">#{index + 1}</span>
                                     </td>
                                     <td className="py-3 px-4">
                                         <span className="text-sm text-gray-900">{user.email}</span>
@@ -282,10 +158,9 @@ export default function Users() {
                                         {getRoleBadge(user.role)}
                                     </td>
                                     <td className="py-3 px-4">
-                                        {getStatusBadge(user.status)}
-                                    </td>
-                                    <td className="py-3 px-4">
-                                        <span className="text-sm text-gray-500">{user.created}</span>
+                                        <span className="text-sm text-gray-500">
+                                            {user.created_at ? new Date(user.created_at).toLocaleDateString('fr-FR') : 'N/A'}
+                                        </span>
                                     </td>
                                     <td className="py-3 px-4">
                                         <button 
@@ -307,6 +182,7 @@ export default function Users() {
                         </div>
                     )}
                 </div>
+                )}
             </div>
 
             {/* User Details Modal */}
@@ -318,12 +194,12 @@ export default function Users() {
                             <div className="flex items-center gap-4 p-4 bg-gray-50 rounded-lg">
                                 <div className="w-12 h-12 bg-gray-200 rounded-full flex items-center justify-center">
                                     <span className="text-xl font-bold text-gray-600">
-                                        {selectedUser.username.charAt(0).toUpperCase()}
+                                        {selectedUser.email.charAt(0).toUpperCase()}
                                     </span>
                                 </div>
                                 <div>
-                                    <h4 className="font-semibold text-gray-900">{selectedUser.username}</h4>
-                                    <p className="text-sm text-gray-500">{selectedUser.email}</p>
+                                    <h4 className="font-semibold text-gray-900">{selectedUser.email}</h4>
+                                    <p className="text-sm text-gray-500">ID: {selectedUser._id}</p>
                                 </div>
                                 <div className="ml-auto">
                                     {getRoleBadge(selectedUser.role)}
@@ -333,15 +209,13 @@ export default function Users() {
                             <div className="grid grid-cols-2 gap-4">
                                 <div>
                                     <label className="block text-sm font-medium text-gray-700 mb-1">Statut</label>
-                                    <div>{getStatusBadge(selectedUser.status)}</div>
+                                    <div>{getStatusBadge(selectedUser.isVerify)}</div>
                                 </div>
                                 <div>
                                     <label className="block text-sm font-medium text-gray-700 mb-1">Créé le</label>
-                                    <p className="text-gray-900">{selectedUser.created}</p>
-                                </div>
-                                <div>
-                                    <label className="block text-sm font-medium text-gray-700 mb-1">Dernière connexion</label>
-                                    <p className="text-gray-900">{selectedUser.lastLogin}</p>
+                                    <p className="text-gray-900">
+                                        {selectedUser.created_at ? new Date(selectedUser.created_at).toLocaleDateString('fr-FR') : 'N/A'}
+                                    </p>
                                 </div>
                             </div>
                         </div>
@@ -364,17 +238,6 @@ export default function Users() {
                     <div className="bg-white border border-gray-300 w-full max-w-md p-6 rounded-lg shadow">
                         <h2 className="text-xl font-semibold mb-5">Ajouter un utilisateur</h2>
                         <form onSubmit={handleSaveUser} className="space-y-4">
-                            <div>
-                                <label className="block text-sm font-medium text-gray-700 mb-1">Nom d'utilisateur</label>
-                                <input
-                                    type="text"
-                                    required
-                                    value={newUser.username}
-                                    onChange={(e) => setNewUser({...newUser, username: e.target.value})}
-                                    className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-slate-500"
-                                    placeholder="Entrez le nom d'utilisateur"
-                                />
-                            </div>
                             <div>
                                 <label className="block text-sm font-medium text-gray-700 mb-1">Email</label>
                                 <input

@@ -188,17 +188,6 @@ export default function LoginAttack() {
                     </div>
                 </div>
 
-                {/* Info Box */}
-                <div className="mt-6 bg-blue-50 border border-blue-200 rounded-lg p-6">
-                    <h3 className="font-semibold text-gray-900 mb-2">Objectif pédagogique</h3>
-                    <p className="text-sm text-gray-600">
-                        Cette simulation démontre comment une attaque par force brute fonctionne. 
-                        Dans un environnement réel, les IDS détectent ce type d'attaque en analysant 
-                        le nombre élevé de tentatives de connexion échouées provenant de la même adresse IP.
-                        Les contre-mesures incluent le blocage temporaire de l'IP, l'authentification 
-                        à deux facteurs (2FA), et la limitation des tentatives.
-                    </p>
-                </div>
             </div>
         </div>
     )
