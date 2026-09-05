@@ -30,8 +30,9 @@ export default fp( (app) => {
         try{
             await request.jwtVerify();
         } catch (err) {
-            reply.code(401).send({ 
+            reply.send({ 
                 success: false,
+                token_invalid: true,
                 message: "Token expired or invalid" 
             })
         }

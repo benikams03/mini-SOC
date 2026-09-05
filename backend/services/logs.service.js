@@ -31,7 +31,7 @@ class LogsServices {
             })
         } else if (type === 'attente') {
             await this.logs.insertOne({
-                type: 'error',
+                type: 'attente',
                 action: role === 'admin' ? 'Connexion administrateur' : 'Connexion utilisateur',
                 user: user,
                 method: 'POST',
