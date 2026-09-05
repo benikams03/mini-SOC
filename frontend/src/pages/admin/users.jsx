@@ -1,4 +1,5 @@
 import { useState, useEffect } from 'react'
+import { useForm } from 'react-hook-form'
 import { Users as UsersIcon, Plus, Eye, Shield, Clock } from 'lucide-react'
 import { get_users, register_simulation } from '../../services/index.js'
 
@@ -10,9 +11,16 @@ export default function Users() {
     const [users, setUsers] = useState([])
     const [loading, setLoading] = useState(false)
 
-    const [newUser, setNewUser] = useState({
-        email: '',
-        password: ''
+    const { 
+        register, 
+        handleSubmit, 
+        formState: { errors, isSubmitting },
+        reset 
+    } = useForm({
+        defaultValues: {
+            email: '',
+            password: ''
+        }
     })
 
     // Charger les utilisateurs au montage du composant
@@ -80,17 +88,17 @@ export default function Users() {
 
     const handleAddUser = () => {
         setIsAddModalOpen(true)
+        reset()
     }
 
     const closeAddModal = () => {
         setIsAddModalOpen(false)
-        setNewUser({ email: '', password: '' })
+        reset()
     }
 
-    const handleSaveUser = async (e) => {
-        e.preventDefault()
+    const handleSaveUser = async (data) => {
         try {
-            const response = await register_simulation(newUser)
+            const response = await register_simulation(data)
             if (response.success) {
                 // Recharger la liste des utilisateurs
                 await loadUsers()
@@ -237,28 +245,42 @@ export default function Users() {
                 <div className="fixed inset-0 flex items-center justify-center z-50 bg-black/30 px-4">
                     <div className="bg-white border border-gray-300 w-full max-w-md p-6 rounded-lg shadow">
                         <h2 className="text-xl font-semibold mb-5">Ajouter un utilisateur</h2>
-                        <form onSubmit={handleSaveUser} className="space-y-4">
+                        <form onSubmit={handleSubmit(handleSaveUser)} className="space-y-4">
                             <div>
                                 <label className="block text-sm font-medium text-gray-700 mb-1">Email</label>
                                 <input
                                     type="email"
-                                    required
-                                    value={newUser.email}
-                                    onChange={(e) => setNewUser({...newUser, email: e.target.value})}
-                                    className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-slate-500"
+                                    {...register('email', { 
+                                        required: 'L\'email est requis',
+                                        pattern: {
+                                            value: /^[A-Z0-9._%+-]+@[A-Z0-9.-]+\.[A-Z]{2,}$/i,
+                                            message: 'Format d\'email invalide'
+                                        }
+                                    })}
+                                    className={`w-full px-3 py-2 border ${errors.email ? 'border-red-500' : 'border-gray-300'} rounded-lg focus:outline-none focus:ring-2 focus:ring-slate-500`}
                                     placeholder="Entrez l'adresse email"
                                 />
+                                {errors.email && (
+                                    <p className="text-red-500 text-xs mt-1">{errors.email.message}</p>
+                                )}
                             </div>
                             <div>
                                 <label className="block text-sm font-medium text-gray-700 mb-1">Mot de passe</label>
                                 <input
                                     type="password"
-                                    required
-                                    value={newUser.password}
-                                    onChange={(e) => setNewUser({...newUser, password: e.target.value})}
-                                    className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-slate-500"
+                                    {...register('password', { 
+                                        required: 'Le mot de passe est requis',
+                                        minLength: {
+                                            value: 2,
+                                            message: 'Le mot de passe doit contenir au moins 2 caractères'
+                                        }
+                                    })}
+                                    className={`w-full px-3 py-2 border ${errors.password ? 'border-red-500' : 'border-gray-300'} rounded-lg focus:outline-none focus:ring-2 focus:ring-slate-500`}
                                     placeholder="Entrez le mot de passe"
                                 />
+                                {errors.password && (
+                                    <p className="text-red-500 text-xs mt-1">{errors.password.message}</p>
+                                )}
                             </div>
                             
                             <div className="flex gap-2 mt-6">
@@ -271,9 +293,10 @@ export default function Users() {
                                 </button>
                                 <button 
                                     type="submit"
-                                    className="flex-1 px-4 py-2 bg-gray-900 text-white rounded-lg hover:bg-gray-800 transition-colors"
+                                    disabled={isSubmitting}
+                                    className="flex-1 px-4 py-2 bg-gray-900 text-white rounded-lg hover:bg-gray-800 transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
                                 >
-                                    Ajouter
+                                    {isSubmitting ? 'Ajout en cours...' : 'Ajouter'}
                                 </button>
                             </div>
                         </form>
