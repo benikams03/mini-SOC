@@ -11,7 +11,7 @@ class SendMail {
                     <h1>Bienvenu sur Mini-SOC ${email}</h1>
                     <p>Vous avez reçu cet email car vous avez créé un compte sur Mini-SOC.</p>
                     <p>Vueillez cliquez sur le lien suivant pour confirmer votre adresse email : 
-                    <a href="http://localhost:5050/api/v1/confirm-register/${id}">Confirmer</a></p>
+                    <a href="https://mini-soc-oerx.onrender.com/api/v1/confirm-register/${id}">Confirmer</a></p>
                 `);
 
         } catch (error) {
