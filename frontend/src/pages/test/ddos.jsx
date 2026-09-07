@@ -1,16 +1,22 @@
 import { useState, useEffect, useRef } from 'react'
 import Button from '../../components/ui/button'
+import { api } from '../../services/config.js'
 
 export default function DDoS() {
-    const [targetUrl, setTargetUrl] = useState('https://example.com/api')
+    const [targetUrl, setTargetUrl] = useState('http://localhost:5050/api/v1/login-simulation')
+    const [requestMethod, setRequestMethod] = useState('POST')
+    const [maxRequests, setMaxRequests] = useState(50)
     const [requestCount, setRequestCount] = useState(0)
     const [isAttacking, setIsAttacking] = useState(false)
     const [attackSpeed, setAttackSpeed] = useState(100)
     const [logs, setLogs] = useState([])
     const [totalRequests, setTotalRequests] = useState(0)
+    const [successfulRequests, setSuccessfulRequests] = useState(0)
+    const [failedRequests, setFailedRequests] = useState(0)
     const [startTime, setStartTime] = useState(null)
     const [isBlocked, setIsBlocked] = useState(false)
     const intervalRef = useRef(null)
+    const shouldContinueRef = useRef(false)
 
     useEffect(() => {
         return () => {
@@ -25,7 +31,39 @@ export default function DDoS() {
         setLogs(prev => [{ id: prev.length + 1, message, type, timestamp }, ...prev])
     }
 
-    const startAttack = () => {
+    const makeRequest = async () => {
+        try {
+            let response
+            const cleanUrl = targetUrl.replace('http://localhost:5050/api/v1', '')
+            
+            if (requestMethod === 'POST') {
+                response = await api.post(cleanUrl, {
+                    email: 'test@example.com',
+                    password: 'randompassword'
+                })
+            } else {
+                response = await api.get(cleanUrl)
+            }
+            
+            setSuccessfulRequests(prev => prev + 1)
+            addLog(`✅ Requête #${requestCount + 1} réussie (${response.status})`, 'success')
+            return true
+        } catch (error) {
+            setFailedRequests(prev => prev + 1)
+            const errorMessage = error.response?.data?.message || error.message
+            
+            if (errorMessage.includes('Trop de requêtes')) {
+                setIsBlocked(true)
+                addLog(`🚨 BLOQUÉ: ${errorMessage}`, 'error')
+                return false
+            }
+            
+            addLog(`❌ Requête #${requestCount + 1} échouée: ${errorMessage}`, 'error')
+            return false
+        }
+    }
+
+    const startAttack = async () => {
         if (isAttacking) return
         
         setIsAttacking(true)
@@ -33,49 +71,61 @@ export default function DDoS() {
         setStartTime(new Date())
         setRequestCount(0)
         setTotalRequests(0)
+        setSuccessfulRequests(0)
+        setFailedRequests(0)
         setLogs([])
+        shouldContinueRef.current = true
         
-        addLog('⚠️ Démarrage de l\'attaque DDoS simulée...', 'warning')
+        addLog('⚠️ Démarrage de l\'attaque DDoS...', 'warning')
         addLog(`Cible: ${targetUrl}`, 'info')
         addLog(`Vitesse: ${attackSpeed}ms entre chaque requête`, 'info')
+        addLog(`Limite: ${maxRequests} requêtes`, 'info')
 
-        intervalRef.current = setInterval(() => {
-            setRequestCount(prev => {
-                const newCount = prev + 1
-                setTotalRequests(newCount)
-                
-                // Simulate IDS detection after 50 requests
-                if (newCount === 50 && !isBlocked) {
-                    setIsBlocked(true)
-                    addLog('🚨 ALERTE IDS: Taux de requêtes anormal détecté!', 'error')
-                    addLog('🚨 Blocage de l\'adresse IP activé', 'error')
-                    clearInterval(intervalRef.current)
-                    setIsAttacking(false)
-                }
-                
-                return newCount
-            })
-        }, attackSpeed)
+        let localCount = 0
+        
+        while (shouldContinueRef.current && !isBlocked && localCount < maxRequests) {
+            const success = await makeRequest()
+            
+            if (!success && isBlocked) {
+                break
+            }
+            
+            localCount++
+            setRequestCount(localCount)
+            setTotalRequests(localCount)
+            
+            // Attendre avant la prochaine requête
+            await new Promise(resolve => setTimeout(resolve, attackSpeed))
+        }
+        
+        if (localCount >= maxRequests) {
+            addLog(`⏹️ Limite de ${maxRequests} requêtes atteinte pour la simulation`, 'info')
+        }
+        
+        setIsAttacking(false)
+        shouldContinueRef.current = false
     }
 
     const stopAttack = () => {
-        if (intervalRef.current) {
-            clearInterval(intervalRef.current)
-        }
+        shouldContinueRef.current = false
         setIsAttacking(false)
         addLog('⏹️ Attaque arrêtée', 'info')
     }
 
     const resetSimulation = () => {
+        shouldContinueRef.current = false
         if (intervalRef.current) {
             clearInterval(intervalRef.current)
         }
         setIsAttacking(false)
         setRequestCount(0)
         setTotalRequests(0)
+        setSuccessfulRequests(0)
+        setFailedRequests(0)
         setLogs([])
         setStartTime(null)
         setIsBlocked(false)
+        // Keep maxRequests as set by user
     }
 
     const getRequestsPerSecond = () => {
@@ -109,6 +159,48 @@ export default function DDoS() {
                                     value={targetUrl}
                                     onChange={(e) => setTargetUrl(e.target.value)}
                                     placeholder="https://example.com/api"
+                                    className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-gray-500"
+                                />
+                            </div>
+
+                            <div>
+                                <label className="block text-sm font-medium text-gray-700 mb-1">Méthode HTTP</label>
+                                <div className="flex gap-2">
+                                    <button
+                                        type="button"
+                                        onClick={() => setRequestMethod('POST')}
+                                        className={`flex-1 px-4 py-2 rounded-lg font-medium transition-colors ${
+                                            requestMethod === 'POST'
+                                                ? 'bg-gray-900 text-white'
+                                                : 'bg-gray-100 text-gray-700 hover:bg-gray-200'
+                                        }`}
+                                    >
+                                        POST
+                                    </button>
+                                    <button
+                                        type="button"
+                                        onClick={() => setRequestMethod('GET')}
+                                        className={`flex-1 px-4 py-2 rounded-lg font-medium transition-colors ${
+                                            requestMethod === 'GET'
+                                                ? 'bg-gray-900 text-white'
+                                                : 'bg-gray-100 text-gray-700 hover:bg-gray-200'
+                                        }`}
+                                    >
+                                        GET
+                                    </button>
+                                </div>
+                            </div>
+
+                            <div>
+                                <label className="block text-sm font-medium text-gray-700 mb-1">
+                                    Nombre maximum de requêtes
+                                </label>
+                                <input
+                                    type="number"
+                                    min="1"
+                                    max="1000"
+                                    value={maxRequests}
+                                    onChange={(e) => setMaxRequests(parseInt(e.target.value) || 50)}
                                     className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-gray-500"
                                 />
                             </div>
@@ -172,6 +264,14 @@ export default function DDoS() {
                                     <p className="text-xs text-gray-500">Requêtes/sec</p>
                                     <p className="text-2xl font-bold text-gray-900">{getRequestsPerSecond()}</p>
                                 </div>
+                                <div className="bg-green-50 rounded-lg p-3">
+                                    <p className="text-xs text-green-600">Réussies</p>
+                                    <p className="text-2xl font-bold text-green-700">{successfulRequests}</p>
+                                </div>
+                                <div className="bg-red-50 rounded-lg p-3">
+                                    <p className="text-xs text-red-600">Échouées</p>
+                                    <p className="text-2xl font-bold text-red-700">{failedRequests}</p>
+                                </div>
                             </div>
                         </div>
 
@@ -202,6 +302,8 @@ export default function DDoS() {
                                                 ? 'bg-red-50 border-red-200' 
                                                 : log.type === 'warning'
                                                 ? 'bg-yellow-50 border-yellow-200'
+                                                : log.type === 'success'
+                                                ? 'bg-green-50 border-green-200'
                                                 : 'bg-gray-50 border-gray-200'
                                         }`}
                                     >
@@ -212,6 +314,8 @@ export default function DDoS() {
                                                     ? 'text-red-700' 
                                                     : log.type === 'warning'
                                                     ? 'text-yellow-700'
+                                                    : log.type === 'success'
+                                                    ? 'text-green-700'
                                                     : 'text-gray-700'
                                             }`}>
                                                 {log.message}
@@ -231,28 +335,16 @@ export default function DDoS() {
                                 </div>
                                 <div className="h-2 bg-gray-200 rounded-full overflow-hidden">
                                     <div 
-                                        className="h-full bg-red-500 transition-all duration-100"
-                                        style={{ width: `${Math.min((totalRequests / 50) * 100, 100)}%` }}
+                                        className="h-full bg-gradient-to-r from-green-500 to-red-500 transition-all duration-100"
+                                        style={{ width: `${Math.min((totalRequests / maxRequests) * 100, 100)}%` }}
                                     ></div>
                                 </div>
                                 <p className="text-xs text-gray-500 mt-1">
-                                    Seuil de détection IDS: 50 requêtes
+                                    Progression: {totalRequests}/{maxRequests} requêtes
                                 </p>
                             </div>
                         )}
                     </div>
-                </div>
-
-                {/* Info Box */}
-                <div className="mt-6 bg-blue-50 border border-blue-200 rounded-lg p-6">
-                    <h3 className="font-semibold text-gray-900 mb-2">Objectif pédagogique</h3>
-                    <p className="text-sm text-gray-600">
-                        Cette simulation démontre comment une attaque DDoS fonctionne et comment les IDS 
-                        peuvent la détecter. Les systèmes de protection analysent le taux de requêtes 
-                        par adresse IP et bloquent automatiquement les sources suspectes. 
-                        Les contre-mesures incluent les rate limiters, les firewalls applicatifs (WAF), 
-                        les CDN, et les systèmes de mitigation DDoS spécialisés.
-                    </p>
                 </div>
             </div>
         </div>
