@@ -1,13 +1,16 @@
 import { useState, useEffect } from 'react'
 import { Filter, Eye, ShieldAlert, AlertTriangle, Clock } from 'lucide-react'
 import { get_alerts } from '../../services/alerts.js'
+import { useNavigate } from 'react-router-dom'
 
 export default function Alerts() {
+    const navigate = useNavigate()
     const [selectedAlert, setSelectedAlert] = useState(null)
     const [isModalOpen, setIsModalOpen] = useState(false)
     const [filter, setFilter] = useState('all')
     const [alerts, setAlerts] = useState([])
     const [loading, setLoading] = useState(false)
+    const [error, setError] = useState(null)
 
     // Charger les alertes au montage du composant
     useEffect(() => {
@@ -19,10 +22,24 @@ export default function Alerts() {
         try {
             const response = await get_alerts()
             if (response.success) {
-                setAlerts(response.data)
+                // Trier les alertes du plus récent au plus ancien
+                const sortedAlerts = (response.data || []).sort((a, b) => {
+                    const dateA = new Date(a.created_at || 0)
+                    const dateB = new Date(b.created_at || 0)
+                    return dateB - dateA
+                })
+                setAlerts(sortedAlerts)
+            } else {
+                if(response.token_invalid){
+                    localStorage.removeItem('access_token')
+                    navigate('/login')
+                }else{
+                    setError('Erreur lors du chargement des alertes')
+                }
             }
         } catch (error) {
             console.error('Erreur lors du chargement des alertes:', error)
+            setError('Erreur de connexion au serveur')
         } finally {
             setLoading(false)
         }
@@ -83,7 +100,11 @@ export default function Alerts() {
 
             {/* Alerts Table */}
             <div className="bg-white border border-gray-200 rounded-lg overflow-hidden">
-                {loading ? (
+                {error ? (
+                    <div className="flex items-center justify-center py-20">
+                        <div className="text-red-500">{error}</div>
+                    </div>
+                ) : loading ? (
                     <div className="flex items-center justify-center py-20">
                         <div className="text-gray-500">Chargement des alertes...</div>
                     </div>

@@ -43,7 +43,7 @@ export default fp( (app) => {
 
     // Rate limiting to prevent abuse, based on IP address
     app.register(fastifyRateLimit, {
-        max: 50,
+        max: 15,
         timeWindow: '1 minute',
     });
 

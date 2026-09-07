@@ -2,6 +2,7 @@ import authController from "../controllers/auth.controller.js"
 import logsController from "../controllers/logs.controller.js"
 import userController from "../controllers/user.controller.js"
 import alertController from "../controllers/alert.controller.js"
+import dashboardController from "../controllers/dashboard.controller.js"
 import alertsService from "../services/alerts.service.js"
 
 export default function authRoutes (app) {
@@ -89,5 +90,11 @@ export default function authRoutes (app) {
         preHandler: [app.authenticate]
     } ,(req, reply) => alertController.getAlerts(req, reply) )
 
+    app.get('/dashboard',{
+        preHandler: [app.authenticate]
+    } ,(req, reply) => dashboardController.getDashboard(req, reply) )
+
+
+    app.get('/test', (req, reply)=>{ reply.send({ success: true }) })
 
 }

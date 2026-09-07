@@ -2,14 +2,17 @@ import { useState, useEffect } from 'react'
 import { useForm } from 'react-hook-form'
 import { Users as UsersIcon, Plus, Eye, Shield, Clock } from 'lucide-react'
 import { get_users, register_simulation } from '../../services/index.js'
+import { useNavigate } from 'react-router-dom'
 
 export default function Users() {
+    const navigate = useNavigate()
     const [selectedUser, setSelectedUser] = useState(null)
     const [isModalOpen, setIsModalOpen] = useState(false)
     const [isAddModalOpen, setIsAddModalOpen] = useState(false)
     const [filter, setFilter] = useState('all')
     const [users, setUsers] = useState([])
     const [loading, setLoading] = useState(false)
+    const [error, setError] = useState(null)
 
     const { 
         register, 
@@ -34,9 +37,17 @@ export default function Users() {
             const response = await get_users()
             if (response.success) {
                 setUsers(response.data)
+            } else {
+                if(response.token_invalid){
+                    localStorage.removeItem('access_token')
+                    navigate('/login')
+                }else{
+                    setError('Erreur lors du chargement des utilisateurs')
+                }
             }
         } catch (error) {
             console.error('Erreur lors du chargement des utilisateurs:', error)
+            setError('Erreur de connexion au serveur')
         } finally {
             setLoading(false)
         }
@@ -137,7 +148,11 @@ export default function Users() {
 
             {/* Users Table */}
             <div className="bg-white border border-gray-200 rounded-lg overflow-hidden">
-                {loading ? (
+                {error ? (
+                    <div className="flex items-center justify-center py-20">
+                        <div className="text-red-500">{error}</div>
+                    </div>
+                ) : loading ? (
                     <div className="flex items-center justify-center py-20">
                         <div className="text-gray-500">Chargement des utilisateurs...</div>
                     </div>
