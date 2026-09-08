@@ -1,39 +1,44 @@
-import nodemailer from "nodemailer"
 import dotenv from "dotenv"
 dotenv.config()
 
 class MailService {
-    constructor() {
-        this.transporter = nodemailer.createTransport({
-            host: "smtp-relay.brevo.com",
-            port: 587,
-            secure: false,
-            auth: {
-                user: process.env.BREVO_SMTP_LOGIN,
-                pass: process.env.BREVO_SMTP_KEY
-            },
-            tls: {
-                rejectUnauthorized: false
-            }
-        })
-    }
-
     async sendMail(email, subject, HtmlContent) {
         try {
-            const mailOptions = {
-                from: `"Mini-SOC" <benikams7@gmail.com>`,
-                to: email,
-                subject: subject,
-                html: HtmlContent,
+            const response = await fetch("https://api.brevo.com/v3/smtp/email", {
+                method: "POST",
                 headers: {
-                    'List-Unsubscribe': `<benikams7@gmail.com>`
-                }
+                    "accept": "application/json",
+                    "api-key": process.env.BREVO_API_KEY,
+                    "content-type": "application/json"
+                },
+                body: JSON.stringify({
+                    sender: {
+                        name: "Mini-SOC",
+                        email: "benikams7@gmail.com"
+                    },
+                    to: [
+                        {
+                            email: email
+                        }
+                    ],
+                    subject: subject,
+                    htmlContent: HtmlContent,
+                    headers: {
+                        "List-Unsubscribe": "<mailto:benikams7@gmail.com>"
+                    }
+                })
+            })
+
+            if (!response.ok) {
+                const error = await response.text()
+                throw new Error(`Brevo API error: ${error}`)
             }
 
-            const res = await this.transporter.sendMail(mailOptions)
-            // console.log(res);
-        } catch(e) {
-            console.error(e);
+            const result = await response.json()
+            console.log("Email envoyé :", result.messageId)
+
+        } catch (e) {
+            console.error("Erreur envoi email :", e)
         }
     }
 }
