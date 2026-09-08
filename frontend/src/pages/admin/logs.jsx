@@ -31,6 +31,7 @@ export default function Logs() {
                         details: `${log.method} ${log.route} - ${log.message}`,
                         userId: log.user || 'unknown',
                         ip: log.adress_ip || 'unknown',
+                        count: log.count || 1,
                         originalDate: log.created_at ? new Date(log.created_at) : new Date()
                     }))
                     // Trier du plus récent au plus ancien
@@ -218,6 +219,10 @@ export default function Logs() {
                                 <div>
                                     <label className="block text-sm font-medium text-gray-700 mb-1">Source</label>
                                     <p className="text-gray-900">{selectedLog.source}</p>
+                                </div>
+                                <div>
+                                    <label className="block text-sm font-medium text-gray-700 mb-1">Nombre de requêtes</label>
+                                    <p className="text-gray-900 font-semibold">{selectedLog.count || 1}</p>
                                 </div>
                             </div>
 
