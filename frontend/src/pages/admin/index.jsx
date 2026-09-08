@@ -1,26 +1,80 @@
+import { useState, useEffect } from 'react'
 import { Siren, ClipboardList, Settings, Users, Activity, ShieldAlert, CheckCircle2, AlertTriangle } from 'lucide-react'
+import { get_dashboard } from '../../services/dashboard.js'
+import { useNavigate } from 'react-router-dom'
 
 export default function Index_admin() {
-    const recentAlerts = [
-        { id: 1, severity: 'critical', message: 'Tentative d\'intrusion détectée', source: '192.168.1.100', time: 'Il y a 2 min' },
-        { id: 2, severity: 'high', message: 'Connexion multiple échouée', source: '192.168.1.45', time: 'Il y a 5 min' },
-        { id: 3, severity: 'medium', message: 'Anomalie de trafic détectée', source: '192.168.1.200', time: 'Il y a 12 min' },
-        { id: 4, severity: 'low', message: 'Scan de ports suspect', source: '192.168.1.78', time: 'Il y a 25 min' },
-        { id: 5, severity: 'medium', message: 'Pattern IDS matché', source: '192.168.1.156', time: 'Il y a 45 min' },
-    ]
+    const navigate = useNavigate()
+    const [recentAlerts, setRecentAlerts] = useState([])
+    const [stats, setStats] = useState({
+        alertsCount: 0,
+        logsCount: 0,
+        usersCount: 0,
+        rulesCount: 42 // Gardé inchangé comme demandé
+    })
+    const [loading, setLoading] = useState(true)
+    const [error, setError] = useState(null)
+
+    useEffect(() => {
+        loadDashboard()
+    }, [])
+
+    const loadDashboard = async () => {
+        setLoading(true)
+        try {
+            const response = await get_dashboard()
+            if (response.success) {
+                setRecentAlerts(response.data.recentAlerts || [])
+                setStats({
+                    alertsCount: response.data.alertsCount || 0,
+                    logsCount: response.data.logsCount || 0,
+                    usersCount: response.data.usersCount || 0,
+                    rulesCount: 42 // Gardé inchangé comme demandé
+                })
+            } else {
+                if(response.token_invalid){
+                    localStorage.removeItem('access_token')
+                    navigate('/login')
+                }else{
+                    setError('Erreur lors du chargement du dashboard')
+                }
+            }
+        } catch (error) {
+            console.error('Erreur lors du chargement du dashboard:', error)
+            setError('Erreur de connexion au serveur')
+        } finally {
+            setLoading(false)
+        }
+    }
 
     const getSeverityBadge = (severity) => {
         const styles = {
-            critical: 'bg-red-100 text-red-700',
-            high: 'bg-orange-100 text-orange-700',
-            medium: 'bg-yellow-100 text-yellow-700',
-            low: 'bg-blue-100 text-blue-700'
+            CRITIQUE: 'bg-red-100 text-red-700',
+            HIGH: 'bg-orange-100 text-orange-700',
+            MEDIUM: 'bg-yellow-100 text-yellow-700',
+            LOW: 'bg-blue-100 text-blue-700'
         }
+        const style = styles[severity] || 'bg-gray-100 text-gray-700'
         return (
-            <span className={`px-2 py-1 rounded-full text-xs font-medium ${styles[severity]}`}>
-                {severity.toUpperCase()}
+            <span className={`px-2 py-1 rounded-full text-xs font-medium ${style}`}>
+                {severity || 'UNKNOWN'}
             </span>
         )
+    }
+
+    const getTimeAgo = (date) => {
+        if (!date) return 'N/A'
+        const now = new Date()
+        const diffMs = now - new Date(date)
+        const diffMins = Math.floor(diffMs / 60000)
+        const diffHours = Math.floor(diffMs / 3600000)
+        const diffDays = Math.floor(diffMs / 86400000)
+
+        if (diffMins < 1) return 'À l\'instant'
+        if (diffMins < 60) return `Il y a ${diffMins} min`
+        if (diffHours < 24) return `Il y a ${diffHours} heure${diffHours > 1 ? 's' : ''}`
+        if (diffDays < 7) return `Il y a ${diffDays} jour${diffDays > 1 ? 's' : ''}`
+        return new Date(date).toLocaleDateString('fr-FR')
     }
 
     return (
@@ -41,8 +95,8 @@ export default function Index_admin() {
                             <Siren className="w-5 h-5 text-gray-600" />
                         </div>
                         <div>
-                            <p className="text-sm text-gray-600">Alertes actives</p>
-                            <p className="text-xl font-bold text-gray-900">24</p>
+                            <p className="text-sm text-gray-600">Alertes</p>
+                            <p className="text-xl font-bold text-gray-900">{stats.alertsCount}</p>
                         </div>
                     </div>
                 </div>
@@ -52,8 +106,8 @@ export default function Index_admin() {
                             <ClipboardList className="w-5 h-5 text-gray-600" />
                         </div>
                         <div>
-                            <p className="text-sm text-gray-600">Logs aujourd'hui</p>
-                            <p className="text-xl font-bold text-gray-900">1,234</p>
+                            <p className="text-sm text-gray-600">Logs</p>
+                            <p className="text-xl font-bold text-gray-900">{stats.logsCount}</p>
                         </div>
                     </div>
                 </div>
@@ -64,7 +118,7 @@ export default function Index_admin() {
                         </div>
                         <div>
                             <p className="text-sm text-gray-600">Règles IDS</p>
-                            <p className="text-xl font-bold text-gray-900">42</p>
+                            <p className="text-xl font-bold text-gray-900">{stats.rulesCount}</p>
                         </div>
                     </div>
                 </div>
@@ -74,8 +128,8 @@ export default function Index_admin() {
                             <Users className="w-5 h-5 text-gray-600" />
                         </div>
                         <div>
-                            <p className="text-sm text-gray-600">Utilisateurs actifs</p>
-                            <p className="text-xl font-bold text-gray-900">8</p>
+                            <p className="text-sm text-gray-600">Utilisateurs</p>
+                            <p className="text-xl font-bold text-gray-900">{stats.usersCount}</p>
                         </div>
                     </div>
                 </div>
@@ -90,24 +144,35 @@ export default function Index_admin() {
                         <p className="text-sm text-gray-500">Les 5 dernières alertes</p>
                     </div>
                     <div className="p-4 space-y-3">
-                        {recentAlerts.map((alert) => (
-                            <div 
-                                key={alert.id}
-                                className="flex items-center justify-between p-4 bg-gray-50 border border-gray-200 rounded-lg hover:bg-gray-100 transition-colors"
-                            >
-                                <div className="flex items-center gap-4">
-                                    {getSeverityBadge(alert.severity)}
-                                    <div>
-                                        <p className="font-medium text-gray-900">{alert.message}</p>
-                                        <p className="text-sm text-gray-500">{alert.source}</p>
+                        {loading ? (
+                            <div className="text-center py-8 text-gray-500">Chargement...</div>
+                        ) : error ? (
+                            <div className="text-center py-8 text-red-500">{error}</div>
+                        ) : recentAlerts.length === 0 ? (
+                            <div className="text-center py-8 text-gray-500">Aucune alerte récente</div>
+                        ) : (
+                            recentAlerts.map((alert) => (
+                                <div 
+                                    key={alert._id}
+                                    className="flex items-center justify-between py-2 px-6 bg-gray-50 border border-gray-200 rounded-lg hover:bg-gray-100 transition-colors"
+                                >
+                                    <div className="flex items-center gap-4">
+                                        {getSeverityBadge(alert.severity)}
+                                        <div>
+                                            <p className="font-medium text-gray-900">{alert.title}</p>
+                                            <p className="text-sm text-gray-500">{alert.user_agent?.ip || 'N/A'}</p>
+                                        </div>
                                     </div>
+                                    <span className="text-sm text-gray-500">{getTimeAgo(alert.created_at)}</span>
                                 </div>
-                                <span className="text-sm text-gray-500">{alert.time}</span>
-                            </div>
-                        ))}
+                            ))
+                        )}
                     </div>
                     <div className="p-4 pt-0 border-t border-gray-200">
-                        <button className="w-full px-4 py-2 text-sm text-gray-700 hover:bg-gray-50 rounded-lg transition-colors">
+                        <button 
+                            onClick={() => navigate('/admin/alerts')}
+                            className="w-full px-4 py-2 text-sm text-gray-700 hover:bg-gray-50 rounded-lg transition-colors"
+                        >
                             Voir toutes les alertes
                         </button>
                     </div>
@@ -132,13 +197,6 @@ export default function Index_admin() {
                             <div>
                                 <p className="font-medium text-gray-900">Moteur IDS</p>
                                 <p className="text-sm text-green-600">Opérationnel</p>
-                            </div>
-                        </div>
-                        <div className="flex items-center gap-3 p-4 bg-yellow-50 rounded-lg">
-                            <div className="w-3 h-3 bg-yellow-500 rounded-full"></div>
-                            <div>
-                                <p className="font-medium text-gray-900">Base de données</p>
-                                <p className="text-sm text-yellow-600">Charge élevée</p>
                             </div>
                         </div>
                     </div>

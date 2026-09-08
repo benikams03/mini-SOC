@@ -228,7 +228,7 @@ class AuthController {
                 { $set: { verified: true } }
             );
 
-            await logsService.createLogCreationCompte('success', verify.email, 'admin', req.ip)
+            await logsService.createLogConnexion('success', verify.email, 'admin', req.ip)
 
             // Generate JWT token
             const token_access = app.jwt.sign(

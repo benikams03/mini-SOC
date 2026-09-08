@@ -6,6 +6,7 @@ import fastifyJwt from "@fastify/jwt";
 import fastifyRateLimit from "@fastify/rate-limit";
 import helmet from "@fastify/helmet";
 import { UAParser } from "ua-parser-js";
+import alertsService from "../services/alerts.service.js";
 
 dotenv.config();
 
@@ -43,8 +44,18 @@ export default fp( (app) => {
 
     // Rate limiting to prevent abuse, based on IP address
     app.register(fastifyRateLimit, {
-        max: 50,
+        max: 15,
         timeWindow: '1 minute',
+
+         errorResponseBuilder: (request, context) => {
+            const user_agent = request.client 
+            alertsService.createAlertDDOS(user_agent)
+
+            return {
+                success: false,
+                message: 'Trop de requêtes. Réessayez dans une minute.',
+            };
+        },
     });
 
     // pour recuperer les informations de l'utilisateurs

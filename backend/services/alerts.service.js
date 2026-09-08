@@ -51,6 +51,46 @@ class AlertsServices {
         }
     }
 
+    async createAlertDDOS(user_agent) {
+        const ip = user_agent.ip || 'Unknown';
+        
+        const existingAlert = await this.alerts.findOne(
+            { 'user_agent.ip': ip, ruleID: 'IDS-002' },
+            { sort: { created_at: -1 } }
+        );
+        
+        if (!existingAlert) {
+            await this.alerts.insertOne({
+                ruleID: 'IDS-002',
+                title: 'Trop de requêtes',
+                category: 'DoS / Abus API',
+                severity: 'CRITIQUE',
+                user: 'null',
+                user_agent: user_agent,
+                action: 'Limiter les requêtes et bloquer temporairement la source',
+                created_at: new Date()
+            });
+        } else {
+            const lastCreated = new Date(existingAlert.created_at);
+            const now = new Date();
+            const timeDiff = now - lastCreated;
+            const oneMinute = 60 * 1000;
+            
+            if (timeDiff >= oneMinute) {
+                await this.alerts.insertOne({
+                    ruleID: 'IDS-002',
+                    title: 'Trop de requêtes',
+                    category: 'DoS / Abus API',
+                    severity: 'CRITIQUE',
+                    user: 'null',
+                    user_agent: user_agent,
+                    action: 'Limiter les requêtes et bloquer temporairement la source',
+                    created_at: new Date()
+                });
+            }
+        }
+    }
+
 }
 
 export default new AlertsServices()
