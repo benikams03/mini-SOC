@@ -3,7 +3,8 @@ import Button from '../../components/ui/button'
 import { api } from '../../services/config.js'
 
 export default function DDoS() {
-    const [targetUrl, setTargetUrl] = useState('http://localhost:5050/api/v1/login-simulation')
+    // const [targetUrl, setTargetUrl] = useState('http://localhost:5050/api/v1/login-simulation')
+    const [targetUrl, setTargetUrl] = useState('https://mini-soc-oerx.onrender.com/api/v1/login-simulation')
     const [requestMethod, setRequestMethod] = useState('POST')
     const [maxRequests, setMaxRequests] = useState(50)
     const [requestCount, setRequestCount] = useState(0)
@@ -34,7 +35,8 @@ export default function DDoS() {
     const makeRequest = async () => {
         try {
             let response
-            const cleanUrl = targetUrl.replace('http://localhost:5050/api/v1', '')
+            const cleanUrl = targetUrl.replace('https://mini-soc-oerx.onrender.com/api/v1', '')
+            // const cleanUrl = targetUrl.replace('http://localhost:5050/api/v1', '')
             
             if (requestMethod === 'POST') {
                 response = await api.post(cleanUrl, {
