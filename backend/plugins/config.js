@@ -1,8 +1,8 @@
 import { MongoClient } from "mongodb";
+import dotenv from "dotenv"
+dotenv.config()
 
-// const login = new MongoClient('mongodb://localhost:27017/')
-// const database = login.db('mini_soc')
-const login = new MongoClient('mongodb+srv://benikams03_db_user:oxN9pPILxaaGvsIX@cluster0.pag65an.mongodb.net')
-const database = login.db('mini-soc')
+const login = new MongoClient(process.env.MONGO_URI)
+const database = login.db('mini_soc')
 
 export { database }
