@@ -95,6 +95,15 @@ export default function authRoutes (app) {
     } ,(req, reply) => dashboardController.getDashboard(req, reply) )
 
 
-    app.get('/test', (req, reply)=>{ reply.send({ success: true }) })
+    app.get('/test',{ preHandler: [app.authenticate] }, (req, reply)=>{ reply.send({ success: true }) })
+    app.get('/test2', (req, reply)=>{ 
+        
+        const token_access = app.jwt.sign(
+                { id: 'test' },
+                { expiresIn: '60s' }
+            )
+        reply.send({ success: true, token: token_access }) 
+    
+    })
 
 }

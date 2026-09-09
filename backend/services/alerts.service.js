@@ -91,23 +91,27 @@ class AlertsServices {
         }
     }
 
-    async createAlertUnauthorizedAccess(user_agent) {
+    async createAlertUnauthorizedAccess(user_agent, isExpired = false) {
         const ip = user_agent.ip || 'Unknown';
         
+        const ruleID = isExpired ? 'IDS-005' : 'IDS-003';
+        const title = isExpired ? 'Token JWT invalide' : 'Accès non autorisé';
+        const category = isExpired ? 'Authentification' : 'Authorization';
+        
         const existingAlert = await this.alerts.findOne(
-            { 'user_agent.ip': ip, ruleID: 'IDS-003' },
+            { 'user_agent.ip': ip, ruleID: ruleID },
             { sort: { created_at: -1 } }
         );
         
         if (!existingAlert) {
             await this.alerts.insertOne({
-                ruleID: 'IDS-003',
-                title: 'Accès non autorisé',
-                category: 'Authorization',
+                ruleID: ruleID,
+                title: title,
+                category: category,
                 severity: 'ÉLEVÉ',
                 user: 'null',
                 user_agent: user_agent,
-                action: 'Refuser l\'accès et journaliser l\'événement',
+                action: isExpired ? 'Refuser la requête et enregistrer l\'événement' : 'Refuser l\'accès et journaliser l\'événement',
                 created_at: new Date()
             });
         } else {
@@ -118,13 +122,13 @@ class AlertsServices {
             
             if (timeDiff >= oneMinute) {
                 await this.alerts.insertOne({
-                    ruleID: 'IDS-003',
-                    title: 'Accès non autorisé',
-                    category: 'Authorization',
+                    ruleID: ruleID,
+                    title: title,
+                    category: category,
                     severity: 'ÉLEVÉ',
                     user: 'null',
                     user_agent: user_agent,
-                    action: 'Refuser l\'accès et journaliser l\'événement',
+                    action: isExpired ? 'Refuser la requête et enregistrer l\'événement' : 'Refuser l\'accès et journaliser l\'événement',
                     created_at: new Date()
                 });
             }

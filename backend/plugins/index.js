@@ -24,6 +24,9 @@ export default fp( (app) => {
     // JWT authentication
     app.register(fastifyJwt, {
         secret: process.env.JWT_SECRET,
+        sign: {
+            expiresIn: '1h'
+        }
     })
     
     // Decorate the request with authenticate method
@@ -31,11 +34,30 @@ export default fp( (app) => {
         try{
             await request.jwtVerify();
         } catch (err) {
-            alertsService.createAlertUnauthorizedAccess(request.client)
+            console.log('JWT Error Details:', {
+                code: err.code,
+                message: err.message,
+                name: err.name,
+                stack: err.stack
+            });
+            
+            // Distinguer entre token expiré et token invalide
+            const isExpired = err.code === 'FAST_JWT_EXPIRED' || 
+                            err.message.includes('expired') ||
+                            err.name === 'TokenExpiredError';
+            
+            alertsService.createAlertUnauthorizedAccess(request.client, isExpired)
+            
             return reply.code(401).send({ 
                 success: false,
                 token_invalid: true,
-                message: "Token expired or invalid" 
+                token_expired: isExpired,
+                message: isExpired ? "Token expired" : "Token invalid",
+                debug: {
+                    code: err.code,
+                    message: err.message,
+                    name: err.name
+                }
             })
         }
     })
