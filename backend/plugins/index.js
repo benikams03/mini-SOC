@@ -31,7 +31,8 @@ export default fp( (app) => {
         try{
             await request.jwtVerify();
         } catch (err) {
-            reply.send({ 
+            alertsService.createAlertUnauthorizedAccess(request.client)
+            return reply.code(401).send({ 
                 success: false,
                 token_invalid: true,
                 message: "Token expired or invalid" 

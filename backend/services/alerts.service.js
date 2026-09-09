@@ -91,6 +91,46 @@ class AlertsServices {
         }
     }
 
+    async createAlertUnauthorizedAccess(user_agent) {
+        const ip = user_agent.ip || 'Unknown';
+        
+        const existingAlert = await this.alerts.findOne(
+            { 'user_agent.ip': ip, ruleID: 'IDS-003' },
+            { sort: { created_at: -1 } }
+        );
+        
+        if (!existingAlert) {
+            await this.alerts.insertOne({
+                ruleID: 'IDS-003',
+                title: 'Accès non autorisé',
+                category: 'Authorization',
+                severity: 'ÉLEVÉ',
+                user: 'null',
+                user_agent: user_agent,
+                action: 'Refuser l\'accès et journaliser l\'événement',
+                created_at: new Date()
+            });
+        } else {
+            const lastCreated = new Date(existingAlert.created_at);
+            const now = new Date();
+            const timeDiff = now - lastCreated;
+            const oneMinute = 60 * 1000;
+            
+            if (timeDiff >= oneMinute) {
+                await this.alerts.insertOne({
+                    ruleID: 'IDS-003',
+                    title: 'Accès non autorisé',
+                    category: 'Authorization',
+                    severity: 'ÉLEVÉ',
+                    user: 'null',
+                    user_agent: user_agent,
+                    action: 'Refuser l\'accès et journaliser l\'événement',
+                    created_at: new Date()
+                });
+            }
+        }
+    }
+
 }
 
 export default new AlertsServices()
