@@ -48,24 +48,6 @@ export default function CTFIndex() {
             difficulty: 'Moyen',
             category: 'Injection'
         },
-        {
-            id: 'sqli',
-            name: 'Injection SQL',
-            description: 'Découvrez et exploitez des vulnérabilités d\'injection SQL dans une base de données.',
-            icon: Database,
-            path: '/simulation/sqli',
-            difficulty: 'Difficile',
-            category: 'Injection'
-        },
-        {
-            id: 'recon',
-            name: 'Reconnaissance',
-            description: 'Effectuez une reconnaissance passive et active sur une cible pour identifier des informations sensibles.',
-            icon: Shield,
-            path: '/simulation/reconnaissance',
-            difficulty: 'Facile',
-            category: 'Reconnaissance'
-        },
     ]
 
     const getDifficultyColor = (difficulty) => {

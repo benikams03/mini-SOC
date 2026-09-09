@@ -30,7 +30,6 @@ export default function CTFLayout() {
         { name: 'Accès Protégé', path: '/simulation/protected-access', icon: Lock },
         { name: 'DDoS', path: '/simulation/ddos', icon: Activity },
         { name: 'Injection XSS', path: '/simulation/xss', icon: Globe },
-        { name: 'Injection SQL', path: '/simulation/sqli', icon: Database },
     ]
 
     const isActive = (path) => location.pathname === path

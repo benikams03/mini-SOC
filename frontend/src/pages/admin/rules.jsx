@@ -42,17 +42,6 @@ export default function Rules() {
         },
         { 
             id: 'IDS-004', 
-            name: 'Tentative SQL Injection', 
-            category: 'Injection',
-            severity: 'critical',
-            status: 'active',
-            created: '2024-08-18',
-            description: 'Identifie les tentatives d\'injection SQL dans les requêtes HTTP et les paramètres de requête.',
-            action: 'Bloquer la requête et générer une alerte critique',
-            plugin: 'validator + règles personnalisées'
-        },
-        { 
-            id: 'IDS-005', 
             name: 'Tentative XSS', 
             category: 'Web Attack',
             severity: 'high',
@@ -63,62 +52,7 @@ export default function Rules() {
             plugin: 'validator / sanitize-html'
         },
         { 
-            id: 'IDS-006', 
-            name: 'IP suspecte', 
-            category: 'Réseau',
-            severity: 'high',
-            status: 'active',
-            created: '2024-08-20',
-            description: 'Détecte les adresses IP provenant de sources malveillantes connues ou présentant un comportement suspect.',
-            action: 'Bloquer l\'IP et créer une alerte',
-            plugin: 'Règle personnalisée'
-        },
-        { 
-            id: 'IDS-007', 
-            name: 'User-Agent suspect', 
-            category: 'Reconnaissance',
-            severity: 'medium',
-            status: 'active',
-            created: '2024-08-21',
-            description: 'Identifie les chaînes user-agent suspectes ou automatisées indiquant des outils de reconnaissance.',
-            action: 'Journaliser et générer une alerte',
-            plugin: 'Règle personnalisée'
-        },
-        { 
-            id: 'IDS-008', 
-            name: 'Accès à une route sensible', 
-            category: 'Reconnaissance',
-            severity: 'high',
-            status: 'active',
-            created: '2024-08-22',
-            description: 'Détecte les tentatives d\'accès aux routes administratives sensibles ou protégées.',
-            action: 'Refuser l\'accès et alerter l\'administrateur',
-            plugin: 'Règle personnalisée'
-        },
-        { 
-            id: 'IDS-009', 
-            name: 'Multiples erreurs 404', 
-            category: 'Reconnaissance',
-            severity: 'medium',
-            status: 'active',
-            created: '2024-08-23',
-            description: 'Détecte plusieurs erreurs 404 depuis la même IP indiquant un balayage de chemins ou une énumération.',
-            action: 'Déclencher une alerte et surveiller l\'IP',
-            plugin: 'Règle personnalisée'
-        },
-        { 
-            id: 'IDS-010', 
-            name: 'Connexion inhabituelle', 
-            category: 'Authentification',
-            severity: 'medium',
-            status: 'active',
-            created: '2024-08-24',
-            description: 'Détecte les tentatives de connexion depuis des lieux, heures ou appareils inhabituels.',
-            action: 'Demander une vérification MFA et journaliser',
-            plugin: 'Règle personnalisée'
-        },
-        { 
-            id: 'IDS-011', 
+            id: 'IDS-005', 
             name: 'Token JWT invalide', 
             category: 'Authentification',
             severity: 'high',
@@ -127,17 +61,6 @@ export default function Rules() {
             description: 'Détecte les tentatives d\'utilisation de tokens JWT invalides, expirés ou falsifiés.',
             action: 'Refuser la requête et enregistrer l\'événement',
             plugin: '@fastify/jwt'
-        },
-        { 
-            id: 'IDS-012', 
-            name: 'Modification de données sensible', 
-            category: 'Integrity',
-            severity: 'critical',
-            status: 'active',
-            created: '2024-08-26',
-            description: 'Détecte les modifications non autorisées de données sensibles ou de fichiers de configuration.',
-            action: 'Bloquer/confirmer l\'opération et générer une alerte critique',
-            plugin: 'Règle personnalisée'
         },
     ]
 

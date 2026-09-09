@@ -16,7 +16,6 @@ const simulationApi = axios.create({
 
 export default function ProtectedAccess() {
     const [url, setUrl] = useState(`${API_BASE_URL}/alerts`)
-    const [method, setMethod] = useState('GET')
     const [token, setToken] = useState('')
     const [attempts, setAttempts] = useState([])
     const [isLoading, setIsLoading] = useState(false)
@@ -32,21 +31,12 @@ export default function ProtectedAccess() {
                 headers['Authorization'] = `Bearer ${token}`
             }
             
-            let response
-            if (method === 'GET') {
-                response = await simulationApi.get(cleanUrl, { headers })
-            } else if (method === 'POST') {
-                response = await simulationApi.post(cleanUrl, {}, { headers })
-            } else if (method === 'PUT') {
-                response = await simulationApi.put(cleanUrl, {}, { headers })
-            } else if (method === 'DELETE') {
-                response = await simulationApi.delete(cleanUrl, { headers })
-            }
+            const response = await simulationApi.get(cleanUrl, { headers })
             
             const result = {
                 id: attempts.length + 1,
                 url,
-                method,
+                method: 'GET',
                 status: 'success',
                 statusCode: response.status,
                 timestamp: new Date().toLocaleTimeString(),
@@ -59,7 +49,7 @@ export default function ProtectedAccess() {
             const result = {
                 id: attempts.length + 1,
                 url,
-                method,
+                method: 'GET',
                 status: 'unauthorized',
                 statusCode: error.response?.status || 401,
                 timestamp: new Date().toLocaleTimeString(),
@@ -74,8 +64,7 @@ export default function ProtectedAccess() {
 
     const resetSimulation = () => {
         setAttempts([])
-        setUrl('http://localhost:5050/api/v1/dashboard')
-        setMethod('GET')
+        setUrl(`${API_BASE_URL}/alerts`)
         setToken('')
     }
 
@@ -106,20 +95,6 @@ export default function ProtectedAccess() {
                                     placeholder="/admin/dashboard"
                                     className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-gray-500"
                                 />
-                            </div>
-
-                            <div>
-                                <label className="block text-sm font-medium text-gray-700 mb-1">Méthode HTTP</label>
-                                <select
-                                    value={method}
-                                    onChange={(e) => setMethod(e.target.value)}
-                                    className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-gray-500"
-                                >
-                                    <option value="GET">GET</option>
-                                    <option value="POST">POST</option>
-                                    <option value="PUT">PUT</option>
-                                    <option value="DELETE">DELETE</option>
-                                </select>
                             </div>
 
                             <div>

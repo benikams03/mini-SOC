@@ -17,7 +17,6 @@ import LoginAttack from './pages/test/login-attack'
 import ProtectedAccess from './pages/test/protected-access'
 import DDoS from './pages/test/ddos'
 import XSS from './pages/test/xss'
-import SQLi from './pages/test/sqli'
 import ConfirmAccount from './pages/confirm_account'
 
 import { ProtectedRoute } from './lib/middleware'
@@ -70,10 +69,6 @@ export const routes = createBrowserRouter([
             {
                 path: "xss",
                 element: <XSS />
-            },
-            {
-                path: "sqli",
-                element: <SQLi />
             }
         ]
     },
