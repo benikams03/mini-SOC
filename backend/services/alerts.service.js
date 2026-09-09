@@ -94,7 +94,7 @@ class AlertsServices {
     async createAlertUnauthorizedAccess(user_agent, isExpired = false) {
         const ip = user_agent.ip || 'Unknown';
         
-        const ruleID = isExpired ? 'IDS-005' : 'IDS-003';
+        const ruleID = isExpired ? 'IDS-004' : 'IDS-003';
         const title = isExpired ? 'Token JWT invalide' : 'Accès non autorisé';
         const category = isExpired ? 'Authentification' : 'Authorization';
         

@@ -42,17 +42,6 @@ export default function Rules() {
         },
         { 
             id: 'IDS-004', 
-            name: 'Tentative XSS', 
-            category: 'Web Attack',
-            severity: 'high',
-            status: 'active',
-            created: '2024-08-19',
-            description: 'Détecte les tentatives de Cross-Site Scripting dans les entrées utilisateur.',
-            action: 'Nettoyer/rejeter l\'entrée et journaliser',
-            plugin: 'validator / sanitize-html'
-        },
-        { 
-            id: 'IDS-005', 
             name: 'Token JWT invalide', 
             category: 'Authentification',
             severity: 'high',

@@ -10,7 +10,7 @@ export default function Index_admin() {
         alertsCount: 0,
         logsCount: 0,
         usersCount: 0,
-        rulesCount: 42 // Gardé inchangé comme demandé
+        rulesCount: 5 // Gardé inchangé comme demandé
     })
     const [loading, setLoading] = useState(true)
     const [error, setError] = useState(null)
@@ -29,7 +29,7 @@ export default function Index_admin() {
                     alertsCount: response.data.alertsCount || 0,
                     logsCount: response.data.logsCount || 0,
                     usersCount: response.data.usersCount || 0,
-                    rulesCount: 42 // Gardé inchangé comme demandé
+                    rulesCount: 5 // Gardé inchangé comme demandé
                 })
             } else {
                 if(response.token_invalid){

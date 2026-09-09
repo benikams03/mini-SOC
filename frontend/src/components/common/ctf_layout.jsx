@@ -29,7 +29,6 @@ export default function CTFLayout() {
         { name: 'Force Brute', path: '/simulation/login-attack', icon: Terminal },
         { name: 'Accès Protégé', path: '/simulation/protected-access', icon: Lock },
         { name: 'DDoS', path: '/simulation/ddos', icon: Activity },
-        { name: 'Injection XSS', path: '/simulation/xss', icon: Globe },
     ]
 
     const isActive = (path) => location.pathname === path

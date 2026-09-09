@@ -96,7 +96,7 @@ export default function authRoutes (app) {
 
 
     app.get('/test',{ preHandler: [app.authenticate] }, (req, reply)=>{ reply.send({ success: true }) })
-    app.get('/test2', (req, reply)=>{ 
+    app.get('/token-temp', (req, reply)=>{ 
         
         const token_access = app.jwt.sign(
                 { id: 'test' },

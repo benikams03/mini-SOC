@@ -112,7 +112,7 @@ class AuthController {
             // Generate JWT token
             const token_access = app.jwt.sign(
                 { id: id },
-                { expiresIn: '1h' }
+                { expiresIn: '4h' }
             )
 
             const token_refresh = app.jwt.sign(
@@ -233,7 +233,7 @@ class AuthController {
             // Generate JWT token
             const token_access = app.jwt.sign(
                 { id: verify._id },
-                { expiresIn: '2h' }
+                { expiresIn: '4h' }
             )
 
             const token_refresh = app.jwt.sign(
