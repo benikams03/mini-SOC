@@ -91,6 +91,50 @@ class AlertsServices {
         }
     }
 
+    async createAlertUnauthorizedAccess(user_agent, isExpired = false) {
+        const ip = user_agent.ip || 'Unknown';
+        
+        const ruleID = isExpired ? 'IDS-004' : 'IDS-003';
+        const title = isExpired ? 'Token JWT invalide' : 'Accès non autorisé';
+        const category = isExpired ? 'Authentification' : 'Authorization';
+        
+        const existingAlert = await this.alerts.findOne(
+            { 'user_agent.ip': ip, ruleID: ruleID },
+            { sort: { created_at: -1 } }
+        );
+        
+        if (!existingAlert) {
+            await this.alerts.insertOne({
+                ruleID: ruleID,
+                title: title,
+                category: category,
+                severity: 'ÉLEVÉ',
+                user: 'null',
+                user_agent: user_agent,
+                action: isExpired ? 'Refuser la requête et enregistrer l\'événement' : 'Refuser l\'accès et journaliser l\'événement',
+                created_at: new Date()
+            });
+        } else {
+            const lastCreated = new Date(existingAlert.created_at);
+            const now = new Date();
+            const timeDiff = now - lastCreated;
+            const oneMinute = 60 * 1000;
+            
+            if (timeDiff >= oneMinute) {
+                await this.alerts.insertOne({
+                    ruleID: ruleID,
+                    title: title,
+                    category: category,
+                    severity: 'ÉLEVÉ',
+                    user: 'null',
+                    user_agent: user_agent,
+                    action: isExpired ? 'Refuser la requête et enregistrer l\'événement' : 'Refuser l\'accès et journaliser l\'événement',
+                    created_at: new Date()
+                });
+            }
+        }
+    }
+
 }
 
 export default new AlertsServices()

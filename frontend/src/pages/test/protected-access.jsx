@@ -1,55 +1,71 @@
 import { useState } from 'react'
 import Button from '../../components/ui/button'
+import axios from 'axios'
+
+// Configuration de l'API - changer cette URL pour utiliser l'API en ligne ou locale
+const API_BASE_URL = 'https://mini-soc-oerx.onrender.com/api/v1'
+// const API_BASE_URL = 'http://localhost:5050/api/v1'
+
+// Créer une instance axios sans interceptor pour cette simulation
+const simulationApi = axios.create({
+    baseURL: API_BASE_URL,
+    headers: {
+        "Content-Type": "application/json",
+    },
+});
 
 export default function ProtectedAccess() {
-    const [url, setUrl] = useState('/admin/dashboard')
-    const [method, setMethod] = useState('GET')
-    const [headers, setHeaders] = useState('')
+    const [url, setUrl] = useState(`${API_BASE_URL}/alerts`)
+    const [token, setToken] = useState('')
     const [attempts, setAttempts] = useState([])
-    const [isAuthenticated, setIsAuthenticated] = useState(false)
-    const [showHint, setShowHint] = useState(false)
+    const [isLoading, setIsLoading] = useState(false)
 
-    const handleRequest = () => {
-        const result = {
-            id: attempts.length + 1,
-            url,
-            method,
-            status: isAuthenticated ? 'success' : 'unauthorized',
-            statusCode: isAuthenticated ? 200 : 401,
-            timestamp: new Date().toLocaleTimeString(),
-            headers: headers || 'Aucun header personnalisé'
+    const handleRequest = async () => {
+        setIsLoading(true)
+        
+        try {
+            const cleanUrl = url.replace(API_BASE_URL, '')
+            const headers = {}
+            
+            if (token) {
+                headers['Authorization'] = `Bearer ${token}`
+            }
+            
+            const response = await simulationApi.get(cleanUrl, { headers })
+            
+            const result = {
+                id: attempts.length + 1,
+                url,
+                method: 'GET',
+                status: 'success',
+                statusCode: response.status,
+                timestamp: new Date().toLocaleTimeString(),
+                token: token || 'Aucun token',
+                message: 'Accès autorisé'
+            }
+            setAttempts([result, ...attempts])
+            
+        } catch (error) {
+            const result = {
+                id: attempts.length + 1,
+                url,
+                method: 'GET',
+                status: 'unauthorized',
+                statusCode: error.response?.status || 401,
+                timestamp: new Date().toLocaleTimeString(),
+                token: token || 'Aucun token',
+                message: error.response?.data?.message || 'Erreur d\'authentification'
+            }
+            setAttempts([result, ...attempts])
+        } finally {
+            setIsLoading(false)
         }
-        setAttempts([result, ...attempts])
-    }
-
-    const handleDirectAccess = () => {
-        setUrl('/admin/dashboard')
-        setMethod('GET')
-        handleRequest()
-    }
-
-    const handleWithToken = () => {
-        setUrl('/admin/dashboard')
-        setMethod('GET')
-        setHeaders('Authorization: Bearer fake_token_12345')
-        setIsAuthenticated(true)
-        handleRequest()
-    }
-
-    const handleWithCookie = () => {
-        setUrl('/admin/dashboard')
-        setMethod('GET')
-        setHeaders('Cookie: session_id=abc123xyz')
-        setIsAuthenticated(true)
-        handleRequest()
     }
 
     const resetSimulation = () => {
         setAttempts([])
-        setIsAuthenticated(false)
-        setUrl('/admin/dashboard')
-        setMethod('GET')
-        setHeaders('')
+        setUrl(`${API_BASE_URL}/alerts`)
+        setToken('')
     }
 
     return (
@@ -82,68 +98,27 @@ export default function ProtectedAccess() {
                             </div>
 
                             <div>
-                                <label className="block text-sm font-medium text-gray-700 mb-1">Méthode HTTP</label>
-                                <select
-                                    value={method}
-                                    onChange={(e) => setMethod(e.target.value)}
-                                    className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-gray-500"
-                                >
-                                    <option value="GET">GET</option>
-                                    <option value="POST">POST</option>
-                                    <option value="PUT">PUT</option>
-                                    <option value="DELETE">DELETE</option>
-                                </select>
-                            </div>
-
-                            <div>
-                                <label className="block text-sm font-medium text-gray-700 mb-1">Headers (optionnel)</label>
-                                <textarea
-                                    value={headers}
-                                    onChange={(e) => setHeaders(e.target.value)}
-                                    placeholder="Authorization: Bearer token"
-                                    rows3
+                                <label className="block text-sm font-medium text-gray-700 mb-1">Token JWT (optionnel)</label>
+                                <input
+                                    type="text"
+                                    value={token}
+                                    onChange={(e) => setToken(e.target.value)}
+                                    placeholder="Entrez votre token JWT"
                                     className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-gray-500"
                                 />
+                                <p className="text-xs text-gray-500 mt-1">
+                                    Le token sera automatiquement ajouté au header Authorization: Bearer
+                                </p>
                             </div>
 
                             <Button 
                                 variant="primary" 
                                 onClick={handleRequest}
+                                disabled={isLoading}
                                 className="w-full"
                             >
-                                Envoyer la requête
+                                {isLoading ? 'Envoi en cours...' : 'Envoyer la requête'}
                             </Button>
-                        </div>
-
-                        {/* Quick Actions */}
-                        <div className="mt-6 pt-6 border-t border-gray-200">
-                            <h3 className="text-sm font-medium text-gray-700 mb-3">Actions rapides</h3>
-                            <div className="space-y-2">
-                                <Button 
-                                    variant="secondary" 
-                                    size="sm" 
-                                    onClick={handleDirectAccess}
-                                    className="w-full"
-                                >
-                                    Accès direct (sans auth)
-                                </Button>
-                                <Button 
-                                    variant="secondary" 
-                                    size="sm" 
-                                    onClick={handleWithToken}
-                                    className="w-full"
-                                >
-                                    Avec token Bearer
-                                </Button>
-                                <Button 
-                                    variant="secondary" 
-                                    size="sm" 
-                                    onClick={handleWithCookie}
-                                    className="w-full"
-                                >
-                                    Avec cookie de session
-                                </Button>
-                            </div>
                         </div>
                     </div>
 
@@ -190,57 +165,23 @@ export default function ProtectedAccess() {
                                             {attempt.timestamp}
                                         </div>
                                         <div className="text-sm text-gray-700">
-                                            <p className="font-medium mb-1">Headers:</p>
-                                            <p className="font-mono text-xs bg-gray-100 p-2 rounded">
-                                                {attempt.headers}
+                                            <p className="font-medium mb-1">Token:</p>
+                                            <p className="font-mono text-xs bg-gray-100 p-2 rounded break-all">
+                                                {attempt.token}
                                             </p>
                                         </div>
                                         <div className={`mt-2 text-sm font-medium ${
                                             attempt.status === 'success' ? 'text-green-700' : 'text-red-700'
                                         }`}>
                                             {attempt.status === 'success' 
-                                                ? '✓ Accès autorisé - Contenu de la page' 
-                                                : '✗ Accès refusé - Authentification requise'}
+                                                ? '✓ Accès autorisé - ' + attempt.message
+                                                : '✗ Accès refusé - ' + attempt.message}
                                         </div>
                                     </div>
                                 ))}
                             </div>
                         )}
                     </div>
-                </div>
-
-                {/* Hint Toggle */}
-                <div className="mt-6">
-                    <button
-                        onClick={() => setShowHint(!showHint)}
-                        className="text-sm text-gray-600 hover:text-gray-900 underline"
-                    >
-                        {showHint ? 'Masquer l\'indice' : 'Afficher un indice'}
-                    </button>
-                    
-                    {showHint && (
-                        <div className="mt-4 bg-yellow-50 border border-yellow-200 rounded-lg p-4">
-                            <h3 className="font-semibold text-gray-900 mb-2">Indice</h3>
-                            <p className="text-sm text-gray-600">
-                                Les pages protégées nécessitent une authentification. Les méthodes courantes 
-                                incluent les tokens Bearer dans les headers, les cookies de session, ou 
-                                l'authentification basique. Essayez d'ajouter un header d'autorisation valide 
-                                pour accéder à la page.
-                            </p>
-                        </div>
-                    )}
-                </div>
-
-                {/* Info Box */}
-                <div className="mt-6 bg-blue-50 border border-blue-200 rounded-lg p-6">
-                    <h3 className="font-semibold text-gray-900 mb-2">Objectif pédagogique</h3>
-                    <p className="text-sm text-gray-600">
-                        Cette simulation illustre le fonctionnement du contrôle d'accès. 
-                        Les systèmes modernes utilisent divers mécanismes d'authentification : 
-                        JWT (JSON Web Tokens), sessions basées sur des cookies, OAuth, etc. 
-                        Les IDS surveillent les tentatives d'accès non autorisées et peuvent 
-                        bloquer les adresses IP qui effectuent trop de requêtes échouées.
-                    </p>
                 </div>
             </div>
         </div>
