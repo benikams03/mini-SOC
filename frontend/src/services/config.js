@@ -16,3 +16,16 @@ api.interceptors.request.use(async (config) => {
     }
     return config;
 });
+
+
+export const ws = (path, token = null) => {
+    const baseUrl = 'ws://localhost:5050/api/v1';
+    // const baseUrl = 'wss://mini-soc-oerx.onrender.com/api/v1';
+
+    let url = `${baseUrl}/${path}`;
+    if (token) {
+        url += `?token=${token}`;
+    }
+
+    return new WebSocket(url);
+}

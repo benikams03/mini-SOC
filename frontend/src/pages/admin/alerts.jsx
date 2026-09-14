@@ -1,6 +1,6 @@
-import { useState, useEffect } from 'react'
+import { useState, useEffect, useRef } from 'react'
 import { Filter, Eye, ShieldAlert, AlertTriangle, Clock } from 'lucide-react'
-import { get_alerts } from '../../services/alerts.js'
+import { get_alerts, connectToAlertsLive } from '../../services/alerts.js'
 import { useNavigate } from 'react-router-dom'
 
 export default function Alerts() {
@@ -11,10 +11,47 @@ export default function Alerts() {
     const [alerts, setAlerts] = useState([])
     const [loading, setLoading] = useState(false)
     const [error, setError] = useState(null)
+    const [liveConnection, setLiveConnection] = useState(false)
+    const wsRef = useRef(null)
 
     // Charger les alertes au montage du composant
     useEffect(() => {
         loadAlerts()
+    }, [])
+
+    // Connexion WebSocket pour les alertes en temps réel
+    useEffect(() => {
+        const websocket = connectToAlertsLive(
+            (message) => {
+                if (message.type === 'new_alert') {
+                    setAlerts(prevAlerts => {
+                        const newAlerts = [message.data, ...prevAlerts]
+                        return newAlerts.sort((a, b) => {
+                            const dateA = new Date(a.created_at || 0)
+                            const dateB = new Date(b.created_at || 0)
+                            return dateB - dateA
+                        })
+                    })
+                } else if (message.type === 'connected') {
+                    setLiveConnection(true)
+                }
+            },
+            (error) => {
+                console.error('Erreur WebSocket:', error)
+                setLiveConnection(false)
+            },
+            () => {
+                setLiveConnection(false)
+            }
+        )
+
+        wsRef.current = websocket
+
+        return () => {
+            if (websocket) {
+                websocket.close()
+            }
+        }
     }, [])
 
     const loadAlerts = async () => {
@@ -93,6 +130,12 @@ export default function Alerts() {
                     <div className="flex items-center gap-2 bg-gray-200 px-3 py-1 rounded-full">
                         <ShieldAlert className="w-4 h-4 text-gray-600" />
                         <span className="text-sm font-medium text-gray-700">{alerts.length} alertes</span>
+                    </div>
+                    <div className={`flex items-center gap-2 px-3 py-1 rounded-full ${liveConnection ? 'bg-green-100' : 'bg-gray-200'}`}>
+                        <div className={`w-2 h-2 rounded-full ${liveConnection ? 'bg-green-500 animate-pulse' : 'bg-gray-400'}`} />
+                        <span className={`text-sm font-medium ${liveConnection ? 'text-green-700' : 'text-gray-500'}`}>
+                            {liveConnection ? 'Live' : 'Offline'}
+                        </span>
                     </div>
                 </div>
             </div>

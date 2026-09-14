@@ -4,6 +4,31 @@ class AlertsServices {
 
     constructor() {
         this.alerts = database.collection('alerts')
+        this.alertClients = null
+    }
+
+    setAlertClients(clients) {
+        this.alertClients = clients
+    }
+
+    notifyAlertClients(alert) {
+        if (this.alertClients) {
+            this.alertClients.forEach(client => {
+                try {
+                    // Avec Fastify WebSocket, l'objet connection a directement la méthode send
+                    if (client.readyState === 1) { // WebSocket.OPEN
+                        client.send(JSON.stringify({
+                            type: 'new_alert',
+                            data: alert
+                        }))
+                    }
+                } catch (error) {
+                    console.error('Erreur lors de l\'envoi de l\'alerte au client:', error)
+                    // Retirer le client en cas d'erreur
+                    this.alertClients.delete(client)
+                }
+            })
+        }
     }
     
     async createAlertLogin(role, user_agent) {
@@ -15,8 +40,7 @@ class AlertsServices {
         );
         
         if (!existingAlert) {
-
-            await this.alerts.insertOne({
+            const newAlert = {
                 ruleID: 'IDS-001',
                 title: 'Brute Force Login',
                 category: role === 'admin' ? 'Authentication administrateur' : 'Authentication user',
@@ -25,8 +49,10 @@ class AlertsServices {
                 user_agent : user_agent,
                 action: 'IP bloquée temporairement',
                 created_at: new Date()
+            }
 
-            });
+            await this.alerts.insertOne(newAlert);
+            this.notifyAlertClients(newAlert);
         } else {
 
             const lastCreated = new Date(existingAlert.created_at);
@@ -35,8 +61,7 @@ class AlertsServices {
             const oneMinute = 60 * 1000;
             
             if (timeDiff >= oneMinute) {
-
-                await this.alerts.insertOne({
+                const newAlert = {
                     ruleID: 'IDS-001',
                     title: 'Brute Force Login',
                     category: role === 'admin' ? 'Authentication administrateur' : 'Authentication user',
@@ -45,7 +70,10 @@ class AlertsServices {
                     user_agent : user_agent,
                     action: 'IP bloquée temporairement',
                     created_at: new Date()
-                });
+                }
+
+                await this.alerts.insertOne(newAlert);
+                this.notifyAlertClients(newAlert);
             }
 
         }
@@ -60,7 +88,7 @@ class AlertsServices {
         );
         
         if (!existingAlert) {
-            await this.alerts.insertOne({
+            const newAlert = {
                 ruleID: 'IDS-002',
                 title: 'Trop de requêtes',
                 category: 'DoS / Abus API',
@@ -69,7 +97,10 @@ class AlertsServices {
                 user_agent: user_agent,
                 action: 'Limiter les requêtes et bloquer temporairement la source',
                 created_at: new Date()
-            });
+            }
+
+            await this.alerts.insertOne(newAlert);
+            this.notifyAlertClients(newAlert);
         } else {
             const lastCreated = new Date(existingAlert.created_at);
             const now = new Date();
@@ -77,7 +108,7 @@ class AlertsServices {
             const oneMinute = 60 * 1000;
             
             if (timeDiff >= oneMinute) {
-                await this.alerts.insertOne({
+                const newAlert = {
                     ruleID: 'IDS-002',
                     title: 'Trop de requêtes',
                     category: 'DoS / Abus API',
@@ -86,7 +117,10 @@ class AlertsServices {
                     user_agent: user_agent,
                     action: 'Limiter les requêtes et bloquer temporairement la source',
                     created_at: new Date()
-                });
+                }
+
+                await this.alerts.insertOne(newAlert);
+                this.notifyAlertClients(newAlert);
             }
         }
     }
@@ -104,7 +138,7 @@ class AlertsServices {
         );
         
         if (!existingAlert) {
-            await this.alerts.insertOne({
+            const newAlert = {
                 ruleID: ruleID,
                 title: title,
                 category: category,
@@ -113,7 +147,10 @@ class AlertsServices {
                 user_agent: user_agent,
                 action: isExpired ? 'Refuser la requête et enregistrer l\'événement' : 'Refuser l\'accès et journaliser l\'événement',
                 created_at: new Date()
-            });
+            }
+
+            await this.alerts.insertOne(newAlert);
+            this.notifyAlertClients(newAlert);
         } else {
             const lastCreated = new Date(existingAlert.created_at);
             const now = new Date();
@@ -121,7 +158,7 @@ class AlertsServices {
             const oneMinute = 60 * 1000;
             
             if (timeDiff >= oneMinute) {
-                await this.alerts.insertOne({
+                const newAlert = {
                     ruleID: ruleID,
                     title: title,
                     category: category,
@@ -130,7 +167,10 @@ class AlertsServices {
                     user_agent: user_agent,
                     action: isExpired ? 'Refuser la requête et enregistrer l\'événement' : 'Refuser l\'accès et journaliser l\'événement',
                     created_at: new Date()
-                });
+                }
+
+                await this.alerts.insertOne(newAlert);
+                this.notifyAlertClients(newAlert);
             }
         }
     }

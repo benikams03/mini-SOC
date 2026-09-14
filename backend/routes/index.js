@@ -5,7 +5,11 @@ import alertController from "../controllers/alert.controller.js"
 import dashboardController from "../controllers/dashboard.controller.js"
 import alertsService from "../services/alerts.service.js"
 
+const alertClients = new Set();
+
 export default function authRoutes (app) {
+    // Initialiser les clients WebSocket dans le service
+    alertsService.setAlertClients(alertClients)
 
     app.post('/register', (req, reply) => authController.register( req, reply) )
 
@@ -90,11 +94,52 @@ export default function authRoutes (app) {
         preHandler: [app.authenticate]
     } ,(req, reply) => alertController.getAlerts(req, reply) )
 
+    // Route WebSocket pour les alertes en temps réel
+    app.get('/alerts-live', {
+        websocket: true,
+        preHandler: async (request, reply) => {
+            try {
+                // Essayer d'abord le header Authorization
+                await request.jwtVerify();
+            } catch (err) {
+                // Si échec, essayer le token dans query string
+                const token = request.query.token;
+                if (token) {
+                    request.headers.authorization = `Bearer ${token}`;
+                    await request.jwtVerify();
+                } else {
+                    throw err;
+                }
+            }
+        }
+    }, (connection, req) => {
+        // Ajouter le client à la liste des clients connectés
+        alertClients.add(connection)
+
+        // Envoyer un message de confirmation
+        connection.send(JSON.stringify({
+            type: 'connected',
+            message: 'Connecté au flux d\'alertes en temps réel'
+        }))
+
+        // Gérer la déconnexion
+        connection.on('close', () => {
+            alertClients.delete(connection)
+        })
+
+        // Gérer les erreurs
+        connection.on('error', (error) => {
+            console.error('WebSocket error:', error)
+            alertClients.delete(connection)
+        })
+    })
+
     app.get('/dashboard',{
         preHandler: [app.authenticate]
     } ,(req, reply) => dashboardController.getDashboard(req, reply) )
 
 
+    // route for test
     app.get('/test',{ preHandler: [app.authenticate] }, (req, reply)=>{ reply.send({ success: true }) })
     app.get('/token-temp', (req, reply)=>{ 
         
