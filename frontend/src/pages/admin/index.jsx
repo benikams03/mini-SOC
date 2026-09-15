@@ -1,6 +1,7 @@
-import { useState, useEffect } from 'react'
+import { useState, useEffect, useRef } from 'react'
 import { Siren, ClipboardList, Settings, Users, Activity, ShieldAlert, CheckCircle2, AlertTriangle } from 'lucide-react'
 import { get_dashboard } from '../../services/dashboard.js'
+import { connectToAlertsLive } from '../../services/alerts.js'
 import { useNavigate } from 'react-router-dom'
 
 export default function Index_admin() {
@@ -14,9 +15,50 @@ export default function Index_admin() {
     })
     const [loading, setLoading] = useState(true)
     const [error, setError] = useState(null)
+    const [liveConnection, setLiveConnection] = useState(false)
+    const wsRef = useRef(null)
 
     useEffect(() => {
         loadDashboard()
+    }, [])
+
+    // Connexion WebSocket pour les alertes en temps réel
+    useEffect(() => {
+        const websocket = connectToAlertsLive(
+            (message) => {
+                if (message.type === 'new_alert') {
+                    // Mettre à jour les alertes récentes
+                    setRecentAlerts(prevAlerts => {
+                        const newAlerts = [message.data, ...prevAlerts]
+                        // Garder seulement les 5 dernières
+                        return newAlerts.slice(0, 5)
+                    })
+
+                    // Mettre à jour le compteur d'alertes
+                    setStats(prevStats => ({
+                        ...prevStats,
+                        alertsCount: prevStats.alertsCount + 1
+                    }))
+                } else if (message.type === 'connected') {
+                    setLiveConnection(true)
+                }
+            },
+            (error) => {
+                console.error('Erreur WebSocket:', error)
+                setLiveConnection(false)
+            },
+            () => {
+                setLiveConnection(false)
+            }
+        )
+
+        wsRef.current = websocket
+
+        return () => {
+            if (websocket) {
+                websocket.close()
+            }
+        }
     }, [])
 
     const loadDashboard = async () => {
@@ -84,6 +126,12 @@ export default function Index_admin() {
                 <div>
                     <h2 className="text-2xl font-bold text-gray-900">Dashboard</h2>
                     <p className="text-sm text-gray-600 mt-1">Vue d'ensemble du SOC</p>
+                </div>
+                <div className={`flex items-center gap-2 px-3 py-1 rounded-full ${liveConnection ? 'bg-green-100' : 'bg-gray-200'}`}>
+                    <div className={`w-2 h-2 rounded-full ${liveConnection ? 'bg-green-500 animate-pulse' : 'bg-gray-400'}`} />
+                    <span className={`text-sm font-medium ${liveConnection ? 'text-green-700' : 'text-gray-500'}`}>
+                        {liveConnection ? 'Live' : 'Offline'}
+                    </span>
                 </div>
             </div>
 
