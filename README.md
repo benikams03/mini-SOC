@@ -108,10 +108,6 @@ Gestion des permissions selon le rôle de l'utilisateur.
 
 Les mots de passe ne sont jamais stockés en clair.
 
-### Validation des entrées
-
-Protection contre les données malformées ou malveillantes.
-
 ### Journalisation
 
 Enregistrement des actions importantes effectuées dans l'application.
@@ -151,17 +147,6 @@ cd backend
 npm install
 ```
 
-### Variables d'environnement
-
-Créer un fichier `.env` dans le backend :
-
-```env
-DATABASE_URL=...
-JWT_SECRET=...
-MFA_SECRET=...
-```
-
-> Le fichier `.env` ne doit jamais être envoyé sur GitHub.
 
 ### Lancer le projet
 
@@ -185,19 +170,19 @@ Le projet est déployé sur une plateforme cloud afin d'être accessible publiqu
 
 ### Frontend
 
-Plateforme : **Vercel **
+Plateforme : **Vercel**
 
 URL : `https://minisoc.vercel.app`
 
 ### Backend
 
-Plateforme : **Render **
+Plateforme : **Render**
 
 URL : `https://mini-soc-api.onrender.com`
 
 ### Base de données
 
-Base de données mysql hébergée sur une plateforme cloud.
+Base de données MongoDB hébergée sur MongoDB Atlas.
 
 > Les secrets et variables sensibles sont configurés directement dans les variables d'environnement de la plateforme de déploiement.
 
@@ -258,14 +243,21 @@ mini-soc/
 │
 ├── frontend/
 │   ├── src/
+|   |   ├── components/
+|   |   ├── assets/
+|   |   ├── pages/
+|   |   ├── lib/
+|   |   ├── services/
+|   |   └── ...
 │   └── ...
 │
 ├── backend/
-│   ├── src/
+│   ├── controllers/
+│   ├── plugins/
+│   ├── routes/
+│   ├── services/
+|   ├── utils/
 │   └── ...
-│
-├── docs/
-│   └── screenshots/
 │
 ├── .gitignore
 ├── README.md
