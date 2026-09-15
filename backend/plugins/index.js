@@ -7,10 +7,14 @@ import fastifyRateLimit from "@fastify/rate-limit";
 import helmet from "@fastify/helmet";
 import { UAParser } from "ua-parser-js";
 import alertsService from "../services/alerts.service.js";
+import fastifyWebSocket from "@fastify/websocket";
 
 dotenv.config();
 
 export default fp( (app) => {
+
+    // du temps reel avec weebsocket
+    app.register(fastifyWebSocket)
 
     // CORS for cross-origin requests
     app.register(fastifyCors, {
