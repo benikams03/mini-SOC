@@ -14,6 +14,8 @@ L'application permet d'ingérer des journaux simulés, d'analyser les événemen
 
 * **MUKUNGULU KAMUIMBA Beni**
 * **MUMBE DIANTUADI Benjamin**
+* **MIKOBI MIKOBI Mavie**
+* **LELE LUNUMFUNU Junior**
 
 ---
 
