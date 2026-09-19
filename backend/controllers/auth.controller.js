@@ -121,8 +121,8 @@ class AuthController {
             )
 
             // redirection vers un site web
-            reply.redirect('http://localhost:5173/confirm-account?access_token='+ token_access + '&refresh_token=' + token_refresh);
-            // reply.redirect('https://mini-soc-unikin.vercel.app/confirm-account?access_token='+ token_access + '&refresh_token=' + token_refresh);
+            // reply.redirect('http://localhost:5173/confirm-account?access_token='+ token_access + '&refresh_token=' + token_refresh);
+            reply.redirect('https://mini-soc-unikin.vercel.app/confirm-account?access_token='+ token_access + '&refresh_token=' + token_refresh);
 
             reply.send({
                 success: true,
