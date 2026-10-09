@@ -1,23 +1,23 @@
 import { Link } from 'react-router-dom'
-import { 
-    Terminal, 
-    Lock, 
-    Activity, 
-    Shield, 
-    Globe, 
-    Database, 
+import {
+    Terminal,
+    Lock,
+    Activity,
+    Shield,
+    Globe,
+    Database,
     ArrowRight,
     Play
 } from 'lucide-react'
 
-export default function CTFIndex() {
+export default function SimulationsIndex() {
     const scenarios = [
         {
             id: 'login',
             name: 'Attaque par force brute',
             description: 'Simulez une attaque par force brute sur un formulaire de connexion. Apprenez à détecter et bloquer ce type d\'attaque.',
             icon: Terminal,
-            path: '/simulation/login-attack',
+            path: '/admin/simulations/login-attack',
             difficulty: 'Facile',
             category: 'Authentification'
         },
@@ -26,7 +26,7 @@ export default function CTFIndex() {
             name: 'Accès page protégée',
             description: 'Tentez d\'accéder à une page protégée sans autorisation. Comprenez les mécanismes de contrôle d\'accès.',
             icon: Lock,
-            path: '/simulation/protected-access',
+            path: '/admin/simulations/protected-access',
             difficulty: 'Moyen',
             category: 'Autorisation'
         },
@@ -35,18 +35,36 @@ export default function CTFIndex() {
             name: 'Requêtes simultanées',
             description: 'Simulez une attaque par déni de service en envoyant de multiples requêtes simultanées.',
             icon: Activity,
-            path: '/simulation/ddos',
+            path: '/admin/simulations/ddos',
             difficulty: 'Difficile',
             category: 'Réseau'
         },
         {
+            id: 'sql',
+            name: 'Injection SQL',
+            description: 'Exploitez une vulnérabilité SQL pour exfiltrer des données sensibles de la base de données.',
+            icon: Database,
+            path: '/admin/simulations/sql-injection',
+            difficulty: 'Difficile',
+            category: 'Injection'
+        },
+        {
             id: 'xss',
-            name: 'Injection XSS',
-            description: 'Exploitez une vulnérabilité XSS pour injecter du code malveillant dans une application web.',
+            name: 'Cross-Site Scripting',
+            description: 'Injectez du code JavaScript malveillant dans un formulaire pour compromettre les utilisateurs.',
             icon: Globe,
-            path: '/simulation/xss',
+            path: '/admin/simulations/xss',
             difficulty: 'Moyen',
             category: 'Injection'
+        },
+        {
+            id: 'path',
+            name: 'Path Traversal',
+            description: 'Accédez aux fichiers système en contournant les restrictions de chemin de fichiers.',
+            icon: Shield,
+            path: '/admin/simulations/path-traversal',
+            difficulty: 'Moyen',
+            category: 'Système'
         },
     ]
 
@@ -70,7 +88,7 @@ export default function CTFIndex() {
                 <div className="mb-8">
                     <h1 className="text-3xl font-bold text-gray-900 mb-2">Simulations de Sécurité</h1>
                     <p className="text-gray-600">
-                        Sélectionnez un scénario pour commencer l'entraînement. Chaque simulation vous permet de comprendre 
+                        Sélectionnez un scénario pour commencer l'entraînement. Chaque simulation vous permet de comprendre
                         et d'expérimenter différentes techniques d'attaque et de défense.
                     </p>
                 </div>
@@ -114,7 +132,7 @@ export default function CTFIndex() {
                     })}
                 </div>
 
-                
+
             </div>
         </div>
     )

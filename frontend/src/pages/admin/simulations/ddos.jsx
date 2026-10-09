@@ -1,6 +1,6 @@
 import { useState, useEffect, useRef } from 'react'
-import Button from '../../components/ui/button'
-import { api } from '../../services/config.js'
+import Button from '../../../components/ui/button'
+import { api } from '../../../services/config.js'
 
 export default function DDoS() {
     // const [targetUrl, setTargetUrl] = useState('http://localhost:5050/api/v1/login-simulation')
@@ -37,7 +37,7 @@ export default function DDoS() {
             let response
             const cleanUrl = targetUrl.replace('https://mini-soc-oerx.onrender.com/api/v1', '')
             // const cleanUrl = targetUrl.replace('http://localhost:5050/api/v1', '')
-            
+
             if (requestMethod === 'POST') {
                 response = await api.post(cleanUrl, {
                     email: 'test@example.com',
@@ -46,20 +46,20 @@ export default function DDoS() {
             } else {
                 response = await api.get(cleanUrl)
             }
-            
+
             setSuccessfulRequests(prev => prev + 1)
             addLog(`✅ Requête #${requestCount + 1} réussie (${response.status})`, 'success')
             return true
         } catch (error) {
             setFailedRequests(prev => prev + 1)
             const errorMessage = error.response?.data?.message || error.message
-            
+
             if (errorMessage.includes('Trop de requêtes')) {
                 setIsBlocked(true)
                 addLog(`🚨 BLOQUÉ: ${errorMessage}`, 'error')
                 return false
             }
-            
+
             addLog(`❌ Requête #${requestCount + 1} échouée: ${errorMessage}`, 'error')
             return false
         }
@@ -67,7 +67,7 @@ export default function DDoS() {
 
     const startAttack = async () => {
         if (isAttacking) return
-        
+
         setIsAttacking(true)
         setIsBlocked(false)
         setStartTime(new Date())
@@ -77,33 +77,33 @@ export default function DDoS() {
         setFailedRequests(0)
         setLogs([])
         shouldContinueRef.current = true
-        
+
         addLog('⚠️ Démarrage de l\'attaque DDoS...', 'warning')
         addLog(`Cible: ${targetUrl}`, 'info')
         addLog(`Vitesse: ${attackSpeed}ms entre chaque requête`, 'info')
         addLog(`Limite: ${maxRequests} requêtes`, 'info')
 
         let localCount = 0
-        
+
         while (shouldContinueRef.current && !isBlocked && localCount < maxRequests) {
             const success = await makeRequest()
-            
+
             if (!success && isBlocked) {
                 break
             }
-            
+
             localCount++
             setRequestCount(localCount)
             setTotalRequests(localCount)
-            
+
             // Attendre avant la prochaine requête
             await new Promise(resolve => setTimeout(resolve, attackSpeed))
         }
-        
+
         if (localCount >= maxRequests) {
             addLog(`⏹️ Limite de ${maxRequests} requêtes atteinte pour la simulation`, 'info')
         }
-        
+
         setIsAttacking(false)
         shouldContinueRef.current = false
     }
@@ -143,7 +143,7 @@ export default function DDoS() {
                 <div className="mb-8">
                     <h1 className="text-3xl font-bold text-gray-900 mb-2">Attaque par Requêtes Simultanées (DDoS)</h1>
                     <p className="text-gray-600">
-                        Simulez une attaque par déni de service en envoyant de multiples requêtes simultanées. 
+                        Simulez une attaque par déni de service en envoyant de multiples requêtes simultanées.
                         Observez comment les IDS détectent et bloquent ce type d'attaque.
                     </p>
                 </div>
@@ -152,7 +152,7 @@ export default function DDoS() {
                     {/* Control Panel */}
                     <div className="bg-white border border-gray-200 rounded-lg p-6">
                         <h2 className="text-xl font-semibold text-gray-900 mb-4">Panneau de contrôle</h2>
-                        
+
                         <div className="space-y-4">
                             <div>
                                 <label className="block text-sm font-medium text-gray-700 mb-1">URL cible</label>
@@ -227,16 +227,16 @@ export default function DDoS() {
                             </div>
 
                             <div className="flex gap-2">
-                                <Button 
-                                    variant="danger" 
+                                <Button
+                                    variant="danger"
                                     onClick={startAttack}
                                     disabled={isAttacking || isBlocked}
                                     className="flex-1"
                                 >
                                     {isAttacking ? 'Attaque en cours...' : 'Démarrer l\'attaque'}
                                 </Button>
-                                <Button 
-                                    variant="secondary" 
+                                <Button
+                                    variant="secondary"
                                     onClick={stopAttack}
                                     disabled={!isAttacking}
                                     className="flex-1"
@@ -245,8 +245,8 @@ export default function DDoS() {
                                 </Button>
                             </div>
 
-                            <Button 
-                                variant="secondary" 
+                            <Button
+                                variant="secondary"
                                 onClick={resetSimulation}
                                 className="w-full"
                             >
@@ -289,7 +289,7 @@ export default function DDoS() {
                     {/* Logs Panel */}
                     <div className="bg-white border border-gray-200 rounded-lg p-6">
                         <h2 className="text-xl font-semibold text-gray-900 mb-4">Journal d'activité</h2>
-                        
+
                         <div className="space-y-2 max-h-96 overflow-auto">
                             {logs.length === 0 ? (
                                 <p className="text-gray-500 text-center py-8">
@@ -297,11 +297,11 @@ export default function DDoS() {
                                 </p>
                             ) : (
                                 logs.map((log) => (
-                                    <div 
+                                    <div
                                         key={log.id}
                                         className={`p-3 rounded-lg border ${
-                                            log.type === 'error' 
-                                                ? 'bg-red-50 border-red-200' 
+                                            log.type === 'error'
+                                                ? 'bg-red-50 border-red-200'
                                                 : log.type === 'warning'
                                                 ? 'bg-yellow-50 border-yellow-200'
                                                 : log.type === 'success'
@@ -312,8 +312,8 @@ export default function DDoS() {
                                         <div className="flex items-start gap-2">
                                             <span className="text-xs text-gray-500 flex-shrink-0">{log.timestamp}</span>
                                             <span className={`text-sm ${
-                                                log.type === 'error' 
-                                                    ? 'text-red-700' 
+                                                log.type === 'error'
+                                                    ? 'text-red-700'
                                                     : log.type === 'warning'
                                                     ? 'text-yellow-700'
                                                     : log.type === 'success'
@@ -336,7 +336,7 @@ export default function DDoS() {
                                     <span className="text-sm text-gray-600">Attaque en cours</span>
                                 </div>
                                 <div className="h-2 bg-gray-200 rounded-full overflow-hidden">
-                                    <div 
+                                    <div
                                         className="h-full bg-gradient-to-r from-green-500 to-red-500 transition-all duration-100"
                                         style={{ width: `${Math.min((totalRequests / maxRequests) * 100, 100)}%` }}
                                     ></div>

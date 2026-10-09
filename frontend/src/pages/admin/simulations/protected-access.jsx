@@ -1,5 +1,5 @@
 import { useState } from 'react'
-import Button from '../../components/ui/button'
+import Button from '../../../components/ui/button'
 import axios from 'axios'
 
 // Configuration de l'API - changer cette URL pour utiliser l'API en ligne ou locale
@@ -22,17 +22,17 @@ export default function ProtectedAccess() {
 
     const handleRequest = async () => {
         setIsLoading(true)
-        
+
         try {
             const cleanUrl = url.replace(API_BASE_URL, '')
             const headers = {}
-            
+
             if (token) {
                 headers['Authorization'] = `Bearer ${token}`
             }
-            
+
             const response = await simulationApi.get(cleanUrl, { headers })
-            
+
             const result = {
                 id: attempts.length + 1,
                 url,
@@ -44,7 +44,7 @@ export default function ProtectedAccess() {
                 message: 'Accès autorisé'
             }
             setAttempts([result, ...attempts])
-            
+
         } catch (error) {
             const result = {
                 id: attempts.length + 1,
@@ -75,7 +75,7 @@ export default function ProtectedAccess() {
                 <div className="mb-8">
                     <h1 className="text-3xl font-bold text-gray-900 mb-2">Accès Page Protégée</h1>
                     <p className="text-gray-600">
-                        Tentez d'accéder à une page protégée sans autorisation. 
+                        Tentez d'accéder à une page protégée sans autorisation.
                         Comprenez les mécanismes de contrôle d'accès et d'authentification.
                     </p>
                 </div>
@@ -84,7 +84,7 @@ export default function ProtectedAccess() {
                     {/* Request Panel */}
                     <div className="bg-white border border-gray-200 rounded-lg p-6">
                         <h2 className="text-xl font-semibold text-gray-900 mb-4">Configuration de la requête</h2>
-                        
+
                         <div className="space-y-4">
                             <div>
                                 <label className="block text-sm font-medium text-gray-700 mb-1">URL</label>
@@ -111,8 +111,8 @@ export default function ProtectedAccess() {
                                 </p>
                             </div>
 
-                            <Button 
-                                variant="primary" 
+                            <Button
+                                variant="primary"
                                 onClick={handleRequest}
                                 disabled={isLoading}
                                 className="w-full"
@@ -141,11 +141,11 @@ export default function ProtectedAccess() {
                         ) : (
                             <div className="space-y-4">
                                 {attempts.map((attempt) => (
-                                    <div 
+                                    <div
                                         key={attempt.id}
                                         className={`p-4 rounded-lg border ${
-                                            attempt.status === 'success' 
-                                                ? 'bg-green-50 border-green-200' 
+                                            attempt.status === 'success'
+                                                ? 'bg-green-50 border-green-200'
                                                 : 'bg-red-50 border-red-200'
                                         }`}
                                     >
@@ -154,8 +154,8 @@ export default function ProtectedAccess() {
                                                 #{attempt.id} - {attempt.method} {attempt.url}
                                             </span>
                                             <span className={`px-2 py-1 rounded text-xs font-medium ${
-                                                attempt.status === 'success' 
-                                                    ? 'bg-green-200 text-green-800' 
+                                                attempt.status === 'success'
+                                                    ? 'bg-green-200 text-green-800'
                                                     : 'bg-red-200 text-red-800'
                                             }`}>
                                                 {attempt.statusCode}
@@ -173,7 +173,7 @@ export default function ProtectedAccess() {
                                         <div className={`mt-2 text-sm font-medium ${
                                             attempt.status === 'success' ? 'text-green-700' : 'text-red-700'
                                         }`}>
-                                            {attempt.status === 'success' 
+                                            {attempt.status === 'success'
                                                 ? '✓ Accès autorisé - ' + attempt.message
                                                 : '✗ Accès refusé - ' + attempt.message}
                                         </div>
