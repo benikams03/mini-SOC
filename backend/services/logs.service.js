@@ -144,7 +144,9 @@ class LogsServices {
         const attackNames = {
             'sql_injection': 'Injection SQL',
             'xss': 'Cross-Site Scripting (XSS)',
-            'path_traversal': 'Path Traversal'
+            'csrf': 'Cross-Site Request Forgery (CSRF)',
+            'command_injection': 'Command Injection',
+            'ssrf': 'Server-Side Request Forgery (SSRF)'
         };
 
         const route = `/simulation/${attackType}`;

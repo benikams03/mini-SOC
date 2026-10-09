@@ -138,85 +138,169 @@ class SimulationController {
         }
     }
 
-    // Path Traversal Simulation
-    async pathTraversal(req, reply) {
+    // CSRF Simulation
+    async csrf(req, reply) {
         try {
-            const { filename } = req.body;
+            const { action, data } = req.body;
 
-            // Détection de patterns path traversal
-            const traversalPatterns = [
-                /\.\.\//,
-                /\.\.\\/,
-                /%2e%2e\//i,
-                /%2e%2e\\/i,
-                /..%2f/i,
-                /..%5c/i,
-                /%252e%252e/i,
-                /\/etc\//i,
-                /\/windows\//i,
-                /C:\\/i
+            // Détection de patterns CSRF (simulation simplifiée)
+            // Dans un vrai scénario, on vérifierait l'absence de token CSRF
+            const detected = true; // Toujours détecté pour la simulation
+
+            if (detected) {
+                await logsService.createLogSimulation('csrf', action, req.ip, 'success');
+                await alertsService.createAlertCSRF({ ip: req.ip }, action);
+
+                reply.send({
+                    success: true,
+                    detected: true,
+                    message: '⚠️ CSRF détecté ! Requête sans token CSRF valide.',
+                    warning: 'Cette requête pourrait exécuter une action non autorisée au nom de l\'utilisateur.'
+                });
+            } else {
+                await logsService.createLogSimulation('csrf', action, req.ip, 'normal');
+
+                reply.send({
+                    success: true,
+                    detected: false,
+                    message: 'Requête valide avec token CSRF.'
+                });
+            }
+
+        } catch (error) {
+            reply.send({
+                success: false,
+                message: error.message
+            });
+        }
+    }
+
+    // Command Injection Simulation
+    async commandInjection(req, reply) {
+        try {
+            const { command } = req.body;
+
+            // Détection de patterns command injection
+            const commandPatterns = [
+                /;/,
+                /\|/,
+                /&&/,
+                /\|\|/,
+                /`/,
+                /\$\(/,
+                />\s*\//,
+                /rm\s+/i,
+                /cat\s+/i,
+                /ls\s+/i,
+                /wget/i,
+                /curl/i,
+                /nc\s+/i,
+                /bash/i,
+                /sh\s+/i,
+                /powershell/i
             ];
 
             let detected = false;
-            for (const pattern of traversalPatterns) {
-                if (pattern.test(filename)) {
+            for (const pattern of commandPatterns) {
+                if (pattern.test(command)) {
                     detected = true;
                     break;
                 }
             }
 
-            // Fichiers autorisés
-            const allowedFiles = [
-                'readme.txt',
-                'about.txt',
-                'contact.txt',
-                'services.txt'
-            ];
-
-            const fileContents = {
-                'readme.txt': 'Bienvenue sur notre application. Version 1.0.0',
-                'about.txt': 'MiniSOC - Système de surveillance de sécurité',
-                'contact.txt': 'Email: contact@minisoc.com - Tel: +123456789',
-                'services.txt': 'Monitoring, Alertes, Logs, Analyse'
-            };
-
-            let result = null;
-            let message = '';
-
             if (detected) {
-                // Simulation d'accès non autorisé
-                result = {
-                    filename: 'etc/passwd',
-                    content: 'root:x:0:0:root:/root:/bin/bash\ndaemon:x:1:1:daemon:/usr/sbin:/usr/sbin/sbin\nbin:x:2:2:bin:/bin:/usr/sbin/nologin\nsys:x:3:3:sys:/dev:/usr/sbin/nologin',
-                    warning: '⚠️ Path Traversal détecté ! Accès aux fichiers système bloqué.'
-                };
-                message = '⚠️ Path Traversal détecté !';
-                await logsService.createLogSimulation('path_traversal', filename, req.ip, 'success');
-                // Créer une alerte
-                await alertsService.createAlertPathTraversal({ ip: req.ip }, filename);
-            } else if (allowedFiles.includes(filename.toLowerCase())) {
-                result = {
-                    filename: filename,
-                    content: fileContents[filename.toLowerCase()]
-                };
-                message = 'Fichier accessible.';
-                await logsService.createLogSimulation('path_traversal', filename, req.ip, 'normal');
+                await logsService.createLogSimulation('command_injection', command, req.ip, 'success');
+                await alertsService.createAlertCommandInjection({ ip: req.ip }, command);
+
+                reply.send({
+                    success: true,
+                    detected: true,
+                    message: '⚠️ Command Injection détectée ! Exécution de commande bloquée.',
+                    warning: 'Tentative d\'exécution de commande système détectée.'
+                });
             } else {
-                result = {
-                    filename: filename,
-                    content: null,
-                    error: 'Fichier non trouvé'
-                };
-                message = 'Fichier non trouvé.';
-                await logsService.createLogSimulation('path_traversal', filename, req.ip, 'error');
+                await logsService.createLogSimulation('command_injection', command, req.ip, 'normal');
+
+                // Simulation de commande valide (ping)
+                const result = `Ping effectué vers ${command}`;
+
+                reply.send({
+                    success: true,
+                    detected: false,
+                    message: 'Commande exécutée avec succès.',
+                    result
+                });
             }
 
+        } catch (error) {
             reply.send({
-                success: true,
-                detected,
-                result,
-                message
+                success: false,
+                message: error.message
             });
+        }
+    }
+
+    // SSRF Simulation
+    async ssrf(req, reply) {
+        try {
+            const { url } = req.body;
+
+            // Détection de patterns SSRF
+            const ssrfPatterns = [
+                /localhost/i,
+                /127\.0\.0\.1/,
+                /0\.0\.0\.0/,
+                /::1/,
+                /169\.254/,
+                /192\.168/,
+                /10\./,
+                /172\.(1[6-9]|2[0-9]|3[0-1])\./,
+                /file:\/\//i,
+                /gopher:\/\//i,
+                /dict:\/\//i,
+                /metadata/i,
+                /169\.254\.169\.254/
+            ];
+
+            let detected = false;
+            let riskLevel = 'normal';
+
+            for (const pattern of ssrfPatterns) {
+                if (pattern.test(url)) {
+                    detected = true;
+                    if (url.includes('metadata') || url.includes('169.254.169.254')) {
+                        riskLevel = 'critical';
+                    }
+                    break;
+                }
+            }
+
+            if (detected) {
+                await logsService.createLogSimulation('ssrf', url, req.ip, 'success');
+                await alertsService.createAlertSSRF({ ip: req.ip }, url);
+
+                reply.send({
+                    success: true,
+                    detected: true,
+                    riskLevel,
+                    message: riskLevel === 'critical'
+                        ? '⚠️ SSRF critique détecté ! Tentative d\'accès aux métadonnées cloud bloquée.'
+                        : '⚠️ SSRF détecté ! Tentative d\'accès aux ressources internes bloquée.',
+                    warning: 'Cette URL pourrait permettre d\'accéder aux ressources internes du serveur.'
+                });
+            } else {
+                await logsService.createLogSimulation('ssrf', url, req.ip, 'normal');
+
+                // Simulation de requête externe valide
+                const result = `Contenu récupéré depuis ${url}`;
+
+                reply.send({
+                    success: true,
+                    detected: false,
+                    message: 'URL externe valide.',
+                    result
+                });
+            }
 
         } catch (error) {
             reply.send({

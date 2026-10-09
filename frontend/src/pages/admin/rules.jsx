@@ -1,5 +1,5 @@
 import { useState } from 'react'
-import { Filter, Eye, Settings, AlertTriangle, Shield, Clock, Power, PowerOff } from 'lucide-react'
+import { Filter, Eye, Settings, AlertTriangle, Shield, Clock, Power, PowerOff, Code, Link as LinkIcon } from 'lucide-react'
 
 export default function Rules() {
     const [selectedRule, setSelectedRule] = useState(null)
@@ -75,14 +75,14 @@ export default function Rules() {
         },
         {
             id: 'IDS-007',
-            name: 'Path Traversal',
-            category: 'Système',
-            severity: 'critical',
+            name: 'CSRF',
+            category: 'Web',
+            severity: 'high',
             status: 'active',
             created: '2024-10-09',
-            description: 'Détecte les tentatives d\'accès aux fichiers système en contournant les restrictions de chemin.',
-            action: 'Bloquer l\'accès aux fichiers et journaliser l\'événement',
-            plugin: 'Custom Validation'
+            description: 'Détecte les requêtes sans token CSRF valide qui pourraient exécuter des actions non autorisées.',
+            action: 'Exiger un token CSRF et journaliser l\'événement',
+            plugin: 'CSRF Protection'
         },
     ]
 

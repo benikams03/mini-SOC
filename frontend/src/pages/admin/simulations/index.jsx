@@ -7,7 +7,9 @@ import {
     Globe,
     Database,
     ArrowRight,
-    Play
+    Play,
+    Code,
+    Link as LinkIcon
 } from 'lucide-react'
 
 export default function SimulationsIndex() {
@@ -58,13 +60,13 @@ export default function SimulationsIndex() {
             category: 'Injection'
         },
         {
-            id: 'path',
-            name: 'Path Traversal',
-            description: 'Accédez aux fichiers système en contournant les restrictions de chemin de fichiers.',
+            id: 'csrf',
+            name: 'CSRF',
+            description: 'Forcez un utilisateur authentifié à exécuter des actions non désirées sans son consentement.',
             icon: Shield,
-            path: '/admin/simulations/path-traversal',
+            path: '/admin/simulations/csrf',
             difficulty: 'Moyen',
-            category: 'Système'
+            category: 'Web'
         },
     ]
 

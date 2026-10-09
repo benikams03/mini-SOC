@@ -271,7 +271,7 @@ class AlertsServices {
         }
     }
 
-    async createAlertPathTraversal(user_agent, payload) {
+    async createAlertCSRF(user_agent, payload) {
         const ip = user_agent.ip || 'Unknown';
 
         const existingAlert = await this.alerts.findOne(
@@ -282,12 +282,12 @@ class AlertsServices {
         if (!existingAlert) {
             const newAlert = {
                 ruleID: 'IDS-007',
-                title: 'Path Traversal détecté',
-                category: 'Système',
-                severity: 'CRITIQUE',
+                title: 'CSRF détecté',
+                category: 'Web',
+                severity: 'ÉLEVÉ',
                 user: 'null',
                 user_agent: user_agent,
-                action: 'Bloquer l\'accès aux fichiers et journaliser l\'événement',
+                action: 'Exiger un token CSRF et journaliser l\'événement',
                 payload: payload.substring(0, 100),
                 created_at: new Date()
             }
@@ -303,12 +303,108 @@ class AlertsServices {
             if (timeDiff >= oneMinute) {
                 const newAlert = {
                     ruleID: 'IDS-007',
-                    title: 'Path Traversal détecté',
-                    category: 'Système',
+                    title: 'CSRF détecté',
+                    category: 'Web',
+                    severity: 'ÉLEVÉ',
+                    user: 'null',
+                    user_agent: user_agent,
+                    action: 'Exiger un token CSRF et journaliser l\'événement',
+                    payload: payload.substring(0, 100),
+                    created_at: new Date()
+                }
+
+                await this.alerts.insertOne(newAlert);
+                this.notifyAlertClients(newAlert);
+            }
+        }
+    }
+
+    async createAlertCommandInjection(user_agent, payload) {
+        const ip = user_agent.ip || 'Unknown';
+
+        const existingAlert = await this.alerts.findOne(
+            { 'user_agent.ip': ip, ruleID: 'IDS-008' },
+            { sort: { created_at: -1 } }
+        );
+
+        if (!existingAlert) {
+            const newAlert = {
+                ruleID: 'IDS-008',
+                title: 'Command Injection détectée',
+                category: 'Injection',
+                severity: 'CRITIQUE',
+                user: 'null',
+                user_agent: user_agent,
+                action: 'Bloquer l\'exécution et journaliser l\'événement',
+                payload: payload.substring(0, 100),
+                created_at: new Date()
+            }
+
+            await this.alerts.insertOne(newAlert);
+            this.notifyAlertClients(newAlert);
+        } else {
+            const lastCreated = new Date(existingAlert.created_at);
+            const now = new Date();
+            const timeDiff = now - lastCreated;
+            const oneMinute = 60 * 1000;
+
+            if (timeDiff >= oneMinute) {
+                const newAlert = {
+                    ruleID: 'IDS-008',
+                    title: 'Command Injection détectée',
+                    category: 'Injection',
                     severity: 'CRITIQUE',
                     user: 'null',
                     user_agent: user_agent,
-                    action: 'Bloquer l\'accès aux fichiers et journaliser l\'événement',
+                    action: 'Bloquer l\'exécution et journaliser l\'événement',
+                    payload: payload.substring(0, 100),
+                    created_at: new Date()
+                }
+
+                await this.alerts.insertOne(newAlert);
+                this.notifyAlertClients(newAlert);
+            }
+        }
+    }
+
+    async createAlertSSRF(user_agent, payload) {
+        const ip = user_agent.ip || 'Unknown';
+
+        const existingAlert = await this.alerts.findOne(
+            { 'user_agent.ip': ip, ruleID: 'IDS-009' },
+            { sort: { created_at: -1 } }
+        );
+
+        if (!existingAlert) {
+            const newAlert = {
+                ruleID: 'IDS-009',
+                title: 'SSRF détecté',
+                category: 'Web',
+                severity: 'CRITIQUE',
+                user: 'null',
+                user_agent: user_agent,
+                action: 'Valider et filtrer les URLs externes',
+                payload: payload.substring(0, 100),
+                created_at: new Date()
+            }
+
+            await this.alerts.insertOne(newAlert);
+            this.notifyAlertClients(newAlert);
+        } else {
+            const lastCreated = new Date(existingAlert.created_at);
+            const now = new Date();
+            const timeDiff = now - lastCreated;
+            const oneMinute = 60 * 1000;
+
+            if (timeDiff >= oneMinute) {
+                const newAlert = {
+                    ruleID: 'IDS-009',
+                    title: 'SSRF détecté',
+                    category: 'Web',
+                    severity: 'CRITIQUE',
+                    user: 'null',
+                    user_agent: user_agent,
+                    action: 'Valider et filtrer les URLs externes',
                     payload: payload.substring(0, 100),
                     created_at: new Date()
                 }

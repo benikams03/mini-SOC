@@ -13,7 +13,7 @@ import ProtectedAccess from './pages/admin/simulations/protected-access'
 import DDoS from './pages/admin/simulations/ddos'
 import SQLInjection from './pages/admin/simulations/sql-injection'
 import XSS from './pages/admin/simulations/xss'
-import PathTraversal from './pages/admin/simulations/path-traversal'
+import CSRF from './pages/admin/simulations/csrf'
 
 import Login from './pages/login'
 import Register from './pages/register'
@@ -97,8 +97,8 @@ export const routes = createBrowserRouter([
                 element: <XSS />
             },
             {
-                path: "simulations/path-traversal",
-                element: <PathTraversal />
+                path: "simulations/csrf",
+                element: <CSRF />
             },
         ]
     }

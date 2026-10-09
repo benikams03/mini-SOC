@@ -83,7 +83,9 @@ export default function authRoutes (app) {
     // Simulation routes for new attacks
     app.post('/simulation/sql-injection', (req, reply) => simulationController.sqlInjection(req, reply) )
     app.post('/simulation/xss', (req, reply) => simulationController.xssInjection(req, reply) )
-    app.post('/simulation/path-traversal', (req, reply) => simulationController.pathTraversal(req, reply) )
+    app.post('/simulation/csrf', (req, reply) => simulationController.csrf(req, reply) )
+    app.post('/simulation/command-injection', (req, reply) => simulationController.commandInjection(req, reply) )
+    app.post('/simulation/ssrf', (req, reply) => simulationController.ssrf(req, reply) )
 
 
     
