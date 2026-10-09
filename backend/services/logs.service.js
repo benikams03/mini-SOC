@@ -116,7 +116,7 @@ class LogsServices {
 
     async createLogDataRetrieval(type, dataType, ip) {
         const route = dataType === 'logs' ? '/logs' : dataType === 'alerts' ? '/alerts' : '/users';
-        
+
         if (type === 'success') {
             await this.createOrUpdateLog({
                 type: 'success',
@@ -137,6 +137,53 @@ class LogsServices {
                 adress_ip: ip,
                 message: `Récupération des ${dataType} échouée`
             }, ip, route);
+        }
+    }
+
+    async createLogSimulation(attackType, payload, ip, result) {
+        const attackNames = {
+            'sql_injection': 'Injection SQL',
+            'xss': 'Cross-Site Scripting (XSS)',
+            'csrf': 'Cross-Site Request Forgery (CSRF)',
+            'command_injection': 'Command Injection',
+            'ssrf': 'Server-Side Request Forgery (SSRF)'
+        };
+
+        const route = `/simulation/${attackType}`;
+
+        if (result === 'success') {
+            await this.logs.insertOne({
+                type: 'warning',
+                action: `Simulation d'attaque - ${attackNames[attackType]}`,
+                user: 'simulation',
+                method: 'POST',
+                route: route,
+                adress_ip: ip,
+                message: `Attaque ${attackNames[attackType]} détectée avec succès. Payload: ${payload.substring(0, 50)}...`,
+                created_at: new Date()
+            });
+        } else if (result === 'normal') {
+            await this.logs.insertOne({
+                type: 'info',
+                action: `Simulation d'attaque - ${attackNames[attackType]}`,
+                user: 'simulation',
+                method: 'POST',
+                route: route,
+                adress_ip: ip,
+                message: `Requête normale pour ${attackNames[attackType]}. Payload: ${payload.substring(0, 50)}...`,
+                created_at: new Date()
+            });
+        } else if (result === 'error') {
+            await this.logs.insertOne({
+                type: 'error',
+                action: `Simulation d'attaque - ${attackNames[attackType]}`,
+                user: 'simulation',
+                method: 'POST',
+                route: route,
+                adress_ip: ip,
+                message: `Erreur lors de la simulation ${attackNames[attackType]}. Payload: ${payload.substring(0, 50)}...`,
+                created_at: new Date()
+            });
         }
     }
 

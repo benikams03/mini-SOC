@@ -1,8 +1,8 @@
 import { Outlet, Link, useLocation, useNavigate } from "react-router-dom"
 import { useState, useEffect } from "react"
-import { ShieldCheck, PanelRight, PanelLeft, 
+import { ShieldCheck, PanelRight, PanelLeft,
     ChartColumnIncreasing, ShieldAlert, Clipboard, Users, Wrench,
-    LogOut } 
+    LogOut, Terminal } 
     from "lucide-react"
 
 export default function Layout_admin() {
@@ -33,6 +33,7 @@ export default function Layout_admin() {
         { name: 'Logs', path: '/admin/logs', icon: Clipboard },
         { name: 'Règles IDS', path: '/admin/rules', icon: Wrench },
         { name: 'Utilisateurs', path: '/admin/users', icon: Users },
+        { name: 'Simulations', path: '/admin/simulations', icon: Terminal },
     ]
 
     const isActive = (path) => location.pathname === path

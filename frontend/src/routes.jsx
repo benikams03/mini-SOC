@@ -1,21 +1,24 @@
 import { createBrowserRouter } from 'react-router-dom'
 
 import Layout_admin from './components/common/layout'
-import CTFLayout from './components/common/ctf_layout'
 import Index_admin from './pages/admin'
 import Alerts from './pages/admin/alerts'
 import Logs from './pages/admin/logs'
 import Rules from './pages/admin/rules'
 import Users from './pages/admin/users'
+
+import SimulationsIndex from './pages/admin/simulations'
+import LoginAttack from './pages/admin/simulations/login-attack'
+import ProtectedAccess from './pages/admin/simulations/protected-access'
+import DDoS from './pages/admin/simulations/ddos'
+import SQLInjection from './pages/admin/simulations/sql-injection'
+import XSS from './pages/admin/simulations/xss'
+import CSRF from './pages/admin/simulations/csrf'
+
 import Login from './pages/login'
 import Register from './pages/register'
 import EmailConfirmation from './pages/email-confirmation'
 import MFA from './pages/mfa'
-
-import CTFIndex from './pages/test'
-import LoginAttack from './pages/test/login-attack'
-import ProtectedAccess from './pages/test/protected-access'
-import DDoS from './pages/test/ddos'
 import ConfirmAccount from './pages/confirm_account'
 
 import { ProtectedRoute } from './lib/middleware'
@@ -46,28 +49,6 @@ export const routes = createBrowserRouter([
         element: <MFA />
     },
     {
-        path: "/simulation",
-        element: <CTFLayout />,
-        children: [
-            {
-                path: "",
-                element: <CTFIndex />
-            },
-            {
-                path: "login-attack",
-                element: <LoginAttack />
-            },
-            {
-                path: "protected-access",
-                element: <ProtectedAccess />
-            },
-            {
-                path: "ddos",
-                element: <DDoS />
-            }
-        ]
-    },
-    {
         path: "/admin",
         element: <ProtectedRoute><Layout_admin /></ProtectedRoute>,
         children: [
@@ -90,6 +71,34 @@ export const routes = createBrowserRouter([
             {
                 path: "users",
                 element: <Users />
+            },
+            {
+                path: "simulations",
+                element: <SimulationsIndex />
+            },
+            {
+                path: "simulations/login-attack",
+                element: <LoginAttack />
+            },
+            {
+                path: "simulations/protected-access",
+                element: <ProtectedAccess />
+            },
+            {
+                path: "simulations/ddos",
+                element: <DDoS />
+            },
+            {
+                path: "simulations/sql-injection",
+                element: <SQLInjection />
+            },
+            {
+                path: "simulations/xss",
+                element: <XSS />
+            },
+            {
+                path: "simulations/csrf",
+                element: <CSRF />
             },
         ]
     }

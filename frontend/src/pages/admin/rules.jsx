@@ -1,5 +1,5 @@
 import { useState } from 'react'
-import { Filter, Eye, Settings, AlertTriangle, Shield, Clock, Power, PowerOff } from 'lucide-react'
+import { Filter, Eye, Settings, AlertTriangle, Shield, Clock, Power, PowerOff, Code, Link as LinkIcon } from 'lucide-react'
 
 export default function Rules() {
     const [selectedRule, setSelectedRule] = useState(null)
@@ -40,9 +40,9 @@ export default function Rules() {
             action: 'Refuser l\'accès et journaliser l\'événement',
             plugin: '@fastify/jwt'
         },
-        { 
-            id: 'IDS-004', 
-            name: 'Token JWT invalide', 
+        {
+            id: 'IDS-004',
+            name: 'Token JWT invalide',
             category: 'Authentification',
             severity: 'high',
             status: 'active',
@@ -50,6 +50,39 @@ export default function Rules() {
             description: 'Détecte les tentatives d\'utilisation de tokens JWT invalides, expirés ou falsifiés.',
             action: 'Refuser la requête et enregistrer l\'événement',
             plugin: '@fastify/jwt'
+        },
+        {
+            id: 'IDS-005',
+            name: 'Injection SQL',
+            category: 'Injection',
+            severity: 'critical',
+            status: 'active',
+            created: '2024-10-09',
+            description: 'Détecte les tentatives d\'injection SQL dans les requêtes pour exfiltrer des données de la base de données.',
+            action: 'Bloquer la requête et journaliser l\'événement',
+            plugin: 'Custom Validation'
+        },
+        {
+            id: 'IDS-006',
+            name: 'Cross-Site Scripting (XSS)',
+            category: 'Injection',
+            severity: 'high',
+            status: 'active',
+            created: '2024-10-09',
+            description: 'Détecte les tentatives d\'injection de scripts malveillants dans les entrées utilisateur.',
+            action: 'Sanitiser l\'entrée et journaliser l\'événement',
+            plugin: 'Custom Validation'
+        },
+        {
+            id: 'IDS-007',
+            name: 'CSRF',
+            category: 'Web',
+            severity: 'high',
+            status: 'active',
+            created: '2024-10-09',
+            description: 'Détecte les requêtes sans token CSRF valide qui pourraient exécuter des actions non autorisées.',
+            action: 'Exiger un token CSRF et journaliser l\'événement',
+            plugin: 'CSRF Protection'
         },
     ]
 

@@ -3,6 +3,7 @@ import logsController from "../controllers/logs.controller.js"
 import userController from "../controllers/user.controller.js"
 import alertController from "../controllers/alert.controller.js"
 import dashboardController from "../controllers/dashboard.controller.js"
+import simulationController from "../controllers/simulation.controller.js"
 import alertsService from "../services/alerts.service.js"
 
 const alertClients = new Set();
@@ -67,7 +68,7 @@ export default function authRoutes (app) {
                 max: 5,
                 timeWindow: '1 minute',
                 errorResponseBuilder: (request, context) => {
-                    const user_agent = request.client 
+                    const user_agent = request.client
                     alertsService.createAlertLogin('user', user_agent)
 
                     return {
@@ -78,6 +79,13 @@ export default function authRoutes (app) {
             },
         },
     }, (req, reply) => authController.loginSimulation(req, reply) )
+
+    // Simulation routes for new attacks
+    app.post('/simulation/sql-injection', (req, reply) => simulationController.sqlInjection(req, reply) )
+    app.post('/simulation/xss', (req, reply) => simulationController.xssInjection(req, reply) )
+    app.post('/simulation/csrf', (req, reply) => simulationController.csrf(req, reply) )
+    app.post('/simulation/command-injection', (req, reply) => simulationController.commandInjection(req, reply) )
+    app.post('/simulation/ssrf', (req, reply) => simulationController.ssrf(req, reply) )
 
 
     
